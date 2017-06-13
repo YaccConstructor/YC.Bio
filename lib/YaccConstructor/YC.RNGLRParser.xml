@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>YC.RNGLRParser</name></assembly>
+<members>
+<member name="P:Yard.Generators.RNGLR.Parser.ParserDebugFuns`1.lastTokens">
+<summary>
+ If you need more then one last token
+</summary>
+</member>
+<member name="F:Yard.Generators.RNGLR.Parser.Edge.Dest">
+<summary>
+ End of the vertex (begin is not needed)
+</summary>
+</member>
+<member name="F:Yard.Generators.RNGLR.Parser.Edge.Ast">
+<summary>
+ AST on the edge
+</summary>
+</member>
+<member name="F:Yard.Generators.RNGLR.Parser.Vertex.State">
+<summary>
+ Usual LALR state
+</summary>
+</member>
+<member name="F:Yard.Generators.RNGLR.Parser.Vertex.Level">
+<summary>
+ Number of token, processed when the vertex was created
+</summary>
+</member>
+<member name="M:Yard.Generators.RNGLR.Parser.containsEdge(Yard.Generators.RNGLR.Parser.Vertex,Yard.Generators.Common.AstNode.Family,System.Collections.Generic.List{System.Tuple{Yard.Generators.RNGLR.Parser.Vertex,Yard.Generators.Common.AstNode.Family,Yard.Generators.Common.AstNode.AST}})">
+<summary>
+ Check if edge with specified destination and family already exists
+</summary>
+</member>
+<member name="M:Yard.Generators.RNGLR.Parser.addEdge(Yard.Generators.RNGLR.Parser.Vertex,Yard.Generators.Common.AstNode.Family,System.Collections.Generic.List{System.Tuple{Yard.Generators.RNGLR.Parser.Vertex,Yard.Generators.Common.AstNode.Family,Yard.Generators.Common.AstNode.AST}},System.Boolean)">
+<summary>
+ Add or extend edge with specified destination and family.
+ All edges are sorted by destination ascending.
+</summary>
+</member>
+<member name="M:Yard.Generators.RNGLR.Parser.containsSimpleEdge(Yard.Generators.RNGLR.Parser.Vertex,Yard.Generators.Common.AstNode.AstNode,System.Collections.Generic.List{System.Tuple{Yard.Generators.RNGLR.Parser.Vertex,Yard.Generators.Common.AstNode.AstNode}})">
+<summary>
+ Check if edge with specified destination and AST already exists
+</summary>
+</member>
+<member name="M:Yard.Generators.RNGLR.Parser.addSimpleEdge(Yard.Generators.RNGLR.Parser.Vertex,Yard.Generators.Common.AstNode.AstNode,System.Collections.Generic.List{System.Tuple{Yard.Generators.RNGLR.Parser.Vertex,Yard.Generators.Common.AstNode.AstNode}})">
+<summary>
+ Add edges, what must be unique (after shift or epsilon-edges).
+ All edges are sorted by destination ascending.
+</summary>
+</member>
+<member name="M:Yard.Generators.RNGLR.Parser.less(Yard.Generators.RNGLR.Parser.Vertex,Yard.Generators.RNGLR.Parser.Vertex)">
+<summary>
+ Compare vertex like a pair: (level, state)
+</summary>
+</member>
+</members>
+</doc>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>YC.AST.Common</name></assembly>
+<members>
+<member name="M:Yard.Generators.Common.AST.Tree`1.TraverseWithRanges``1(Microsoft.FSharp.Core.FSharpFunc{`0,System.Tuple{``0,``0}},Microsoft.FSharp.Core.FSharpFunc{System.Int32,Microsoft.FSharp.Core.Unit},Microsoft.FSharp.Core.FSharpFunc{Yard.Generators.Common.AstNode.AST,Microsoft.FSharp.Core.Unit},Microsoft.FSharp.Core.FSharpFunc{System.Int32,Microsoft.FSharp.Core.FSharpFunc{FSharpx.Collections.Experimental.BlockResizeArray{System.Tuple{``0,``0}},Microsoft.FSharp.Core.Unit}})">
+<summary>
+ handleCycleNode is used for handling nodes, contained in cycles
+   and having no children family, where each node has smaller position.
+</summary>
+</member>
+<member name="M:Yard.Generators.Common.AST.Tree`1.GetNextTree(Microsoft.FSharp.Collections.FSharpList{Yard.Generators.Common.AstNode.Terminal},Microsoft.FSharp.Core.FSharpFunc{Yard.Generators.Common.AstNode.Family,System.Boolean})">
+ <summary>
+ Returns tree which contains some unprocessed tokens. 
+ Uses in highlighting.
+ <para> unprocessed - list of number of tokens that need process. </para>
+ <para> inputFilter is a function that is involved in choosing trees.</para>
+ </summary>
+</member>
+<member name="M:Yard.Generators.Common.AST.Tree`1.GetForestWithToken``1(``0,Microsoft.FSharp.Core.FSharpFunc{`0,System.Collections.Generic.IEnumerable{``0}})">
+<summary>
+ Returns all trees that contain some token.
+ <para> tokRange - range of token </para>
+ <para> tokenToRange - mapping from token to range </para>
+</summary>
+</member>
+<member name="M:Yard.Generators.Common.AST.Tree`1.ChooseSingleAst">
+<summary>
+ Choose first correct subtree without cycles.
+</summary>
+</member>
+<member name="M:Yard.Generators.Common.AST.Tree`1.ChooseLongestMatch">
+<summary>
+ Select children, where the first subnode ends first.
+ In case of ambiguity look at second one.
+ If ranges are equal, then select one, having the smallest rule number.
+ Eliminate cycles.
+</summary>
+</member>
+<member name="T:Yard.Generators.Common.AST.TranslateArguments`2">
+<summary>
+ Arguments for tanslation calling, seen by user
+</summary>
+</member>
+<member name="M:Yard.Generators.Common.ASTGLL.Tree`1.GetStrings(System.Int32,Microsoft.FSharp.Core.FSharpFunc{`0,System.String})">
+<summary>
+ Returns all paths found for specific nonterminal
+</summary>
+</member>
+<member name="T:Yard.Generators.Common.AstNode.AST">
+<summary>
+ Non-terminal expansion: production, family of children
+ All nodes are stored in array, so there is a correspondence between integer and node.
+ Family of children - For one nonTerminal there can be a lot of derivation trees.
+</summary>
+</member>
+</members>
+</doc>

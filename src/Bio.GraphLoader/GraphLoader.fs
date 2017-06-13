@@ -77,13 +77,14 @@ type EdgeCompressedGraphInput (edges: array<TaggedEdge<int<vNumInOriginalGraph>,
         let str = printer.Generate()        
             
         System.IO.File.WriteAllText(fileName, str)
-    member x.PositionToString(pos: int): string = 
-        let inline getPosOnEdge (packedValue : int) =
-            int (int packedValue &&& 0xffff) * 1<posInSubgraph>
-        let inline getEdge (packedValue : int) = 
-            int (int packedValue >>> 16)
-        sprintf "E:%i P:%i" (getEdge pos) (getPosOnEdge pos)
     interface IParserInput with
+        member x.PositionToString(pos: int): string = 
+            let inline getPosOnEdge (packedValue : int) =
+                int (int packedValue &&& 0xffff) * 1<posInSubgraph>
+            let inline getEdge (packedValue : int) = 
+                int (int packedValue >>> 16)
+            sprintf "E:%i P:%i" (getEdge pos) (getPosOnEdge pos)
+
         member this.InitialPositions = initialPositions
         
         [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
@@ -148,7 +149,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
     let longEdges = ResizeArray<_>()
 
     let forFilter =
-        System.IO.File.ReadAllLines(@"C:\gsv\projects\YC\YaccConstructor\src\Bio.Search\data\a1")
+        System.IO.File.ReadAllLines(@"..\..\..\src\Bio.Search\data\a1")
         |> Seq.map (fun s -> s.Trim() |> int)
         |> Set.ofSeq
         |> Array.ofSeq

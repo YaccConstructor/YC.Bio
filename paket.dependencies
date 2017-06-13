@@ -1,8 +1,9 @@
 source https://nuget.org/api/v2
 
+nuget Argu
 nuget FSharp.Core redirects: force
+nuget FSharpx.Collections.Experimental
 nuget YC.QuickGraph
-nuget YC.SDK 0.2.0-alpha1 alpha
 
 group Build
   source https://nuget.org/api/v2

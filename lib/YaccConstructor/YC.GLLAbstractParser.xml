@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>YC.GLLAbstractParser</name></assembly>
+<members>
+<member name="M:YC.GLL.GSS.GSS.ContainsVertexAndEdge(YC.GLL.GSS.GSSVertex,YC.GLL.GSS.GSSVertex,System.Int32,Yard.Generators.GLL.ParserCommon.ParseData)">
+<summary>
+ Checks for existing of edge in gss edges set. If not adds it to edges set.
+</summary>
+</member>
+<member name="M:YC.GLL.GSS.GSSVertex.ContainsContext(System.Int32,System.Int32,Yard.Generators.GLL.ParserCommon.ParseData)">
+<summary>
+ Checks for existing of context in SetU. If not adds it to SetU.
+</summary>
+</member>
+</members>
+</doc>

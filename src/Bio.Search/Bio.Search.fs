@@ -210,7 +210,7 @@ let searchInBioGraphs (searchCfg : SearchConfig) (config:Config) (graphs : EdgeC
                 }
             loop 0)
     
-    let agents = Array.init config.AgentsCount (sprintf "searchAgent%A" >> agent)
+    let agents = Array.init 1(*config.AgentsCount*) (sprintf "searchAgent%A" >> agent)
     let qToProcess = Queue<_>(graphs |> Array.mapi (fun i x -> (i, x)))
     while qToProcess.Count > 0 do
         agents
@@ -313,7 +313,7 @@ let searchMain (config:Config) =
     config.Lap "Data preparing"
 
     searchInBioGraphs config.MiddleSearchConfig config graphs assembliesOf16s 
-    
+    System.Threading.Thread.Sleep(5000) |> ignore
     config.Lap "Middles parsing"
 
     let globalResultCount = ref assembliesOf16s.Count

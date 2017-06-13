@@ -3,15 +3,17 @@ namespace System
 open System.Reflection
 
 [<assembly: AssemblyTitleAttribute("Bio.GraphLoader")>]
-[<assembly: AssemblyProductAttribute("YaccConstructor")>]
-[<assembly: AssemblyDescriptionAttribute("Platform for parser generators and other grammarware research and development.")>]
-[<assembly: AssemblyVersionAttribute("0.1.0.1")>]
-[<assembly: AssemblyFileVersionAttribute("0.1.0.1")>]
+[<assembly: AssemblyProductAttribute("YC.Bio")>]
+[<assembly: AssemblyDescriptionAttribute("Tools for metagenomic assembly processing.")>]
+[<assembly: AssemblyVersionAttribute("0.0.1")>]
+[<assembly: AssemblyFileVersionAttribute("0.0.1")>]
+[<assembly: AssemblyConfigurationAttribute("Release")>]
 do ()
 
 module internal AssemblyVersionInformation =
     let [<Literal>] AssemblyTitle = "Bio.GraphLoader"
-    let [<Literal>] AssemblyProduct = "YaccConstructor"
-    let [<Literal>] AssemblyDescription = "Platform for parser generators and other grammarware research and development."
-    let [<Literal>] AssemblyVersion = "0.1.0.1"
-    let [<Literal>] AssemblyFileVersion = "0.1.0.1"
+    let [<Literal>] AssemblyProduct = "YC.Bio"
+    let [<Literal>] AssemblyDescription = "Tools for metagenomic assembly processing."
+    let [<Literal>] AssemblyVersion = "0.0.1"
+    let [<Literal>] AssemblyFileVersion = "0.0.1"
+    let [<Literal>] AssemblyConfiguration = "Release"

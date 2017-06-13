@@ -109,14 +109,9 @@ Target "AssemblyInfo" (fun _ ->
         )
 )
 
-// Copies binaries from default VS location to expected bin folder
-// But keeps a subdirectory structure for each project in the
-// src folder to support multiple project outputs
+// Copies YaccConstructor binaries
 Target "CopyBinaries" (fun _ ->
-    !! "src/**/*.??proj"
-    -- "src/**/*.shproj"
-    |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) </> "bin" </> configuration, "bin" </> (System.IO.Path.GetFileNameWithoutExtension f)))
-    |>  Seq.iter (fun (fromDir, toDir) -> CopyDir toDir fromDir (fun _ -> true))
+    CopyDir (@"Bin/Debug/v40/") @"lib/YaccConstructor" (fun _ -> true)
 )
 
 // --------------------------------------------------------------------------------------
@@ -377,8 +372,8 @@ Target "BuildPackage" DoNothing
 Target "All" DoNothing
 
 "AssemblyInfo"
-  ==> "Build"
   ==> "CopyBinaries"
+  ==> "Build"
   ==> "RunTests"
   ==> "GenerateReferenceDocs"
   ==> "GenerateDocs"

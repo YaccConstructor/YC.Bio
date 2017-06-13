@@ -68,7 +68,7 @@ type Config (argv) =
     let tailsBias = args.GetResult(<@ TailsBias @>, defaultValue = 1.0)
     let headMiddleBias = args.GetResult(<@ HeadsMiddlesBias @>, defaultValue = 6.0)
     let tmpDir = args.GetResult(<@ TmpDir @>, defaultValue = "BioSearchOut")
-    let grammarsDir = args.GetResult(<@ PathToGrammar @>, defaultValue = @"../../../src/YC.GrammarZOO/Bio/16s/")
+    let grammarsDir = args.GetResult(<@ PathToGrammar @>, defaultValue = @"..\..\..\src\YC.GrammarZOO\Bio\16s\")
     let inputGraphPath = 
         args.GetResult <@ Input @> 
         |> (fun s -> 
@@ -95,12 +95,12 @@ type Config (argv) =
         let fe = new YardFrontend()
         let gen = new GLL()
         let conv = seq{yield new ExpandMeta()}
-        YaccConstructor.API.generate (System.IO.Path.Combine(grammarsDir, grammarFile))
-                                     fe gen
-                                     None
-                                     conv
-                                     [|""|]
-                                     [] :?> ParserSourceGLL
+        YC.API.generate (System.IO.Path.Combine(grammarsDir, grammarFile))
+                        fe gen
+                        None
+                        conv
+                        [|""|]
+                        [] :?> ParserSourceGLL
 
     let parserSourceHead = getParserSource "R16S_1_18.yrd"
     let parserSourceMiddle = getParserSource "R16S_19_27.yrd"

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>YC.Generators.Common</name></assembly>
+<members>
+<member name="M:Yard.Generators.Common.FSA.Common.findEquivalenceClasses(Yard.Generators.Common.FSA.Common.InternalFSA)">
+<summary>
+ Returns sets of equivalent states
+ http://goo.gl/z9uJP0
+</summary>
+</member>
+<member name="M:Yard.Generators.Common.FSA.Common.toDFA(Yard.Generators.Common.FSA.Common.InternalFSA)">
+<summary>
+ Converts NFA without epsilon edges to DFA
+</summary>
+</member>
+<member name="M:Yard.Generators.Common.FSA.Common.removeEpsilonEdges(Yard.Generators.Common.FSA.Common.InternalFSA)">
+<summary>
+ Removes epsilon edges from FA using epsilon closure.
+</summary>
+</member>
+</members>
+</doc>

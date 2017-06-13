@@ -1,0 +1,3 @@
+[submodule "src/YC.GrammarZOO"]
+	path = src/YC.GrammarZOO
+	url = https://github.com/YaccConstructor/YC.GrammarZOO.git

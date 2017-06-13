@@ -1,0 +1,475 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CustomHashSet</name>
+    </assembly>
+    <members>
+        <member name="T:System.Collections.Generic.BitHelper">
+            <summary>
+            ABOUT:
+            Helps with operations that rely on bit marking to indicate whether an item in the 
+            collection should be added, removed, visited already, etc. 
+            
+            BitHelper doesn't allocate the array; you must pass in an array or ints allocated on the 
+            stack or heap. ToIntArrayLength() tells you the int array size you must allocate. 
+            
+            USAGE:
+            Suppose you need to represent a bit array of length (i.e. logical bit array length)
+            BIT_ARRAY_LENGTH. Then this is the suggested way to instantiate BitHelper:
+            ***************************************************************************
+            int intArrayLength = BitHelper.ToIntArrayLength(BIT_ARRAY_LENGTH);
+            BitHelper bitHelper;
+            if (intArrayLength less than stack alloc threshold)
+                int* m_arrayPtr = stackalloc int[intArrayLength];
+                bitHelper = new BitHelper(m_arrayPtr, intArrayLength);
+            else
+                int[] m_arrayPtr = new int[intArrayLength];
+                bitHelper = new BitHelper(m_arrayPtr, intArrayLength);
+            ***************************************************************************
+            
+            IMPORTANT:
+            The second ctor args, length, should be specified as the length of the int array, not
+            the logical bit array. Because length is used for bounds checking into the int array,
+            it's especially important to get this correct for the stackalloc version. See the code 
+            samples above; this is the value gotten from ToIntArrayLength(). 
+            
+            The length ctor argument is the only exception; for other methods -- MarkBit and 
+            IsMarked -- pass in values as indices into the logical bit array, and it will be mapped
+            to the position within the array of ints.
+            
+            FUTURE OPTIMIZATIONS:
+            A method such as FindFirstMarked/Unmarked Bit would be useful for callers that operate 
+            on a bit array and then need to loop over it. In particular, if it avoided visiting 
+            every bit, it would allow good perf improvements when the bit array is sparse.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.BitHelper.#ctor(System.Int32*,System.Int32)">
+            <summary>
+            Instantiates a BitHelper with a heap alloc'd array of ints
+            </summary>
+            <param name="bitArray">int array to hold bits</param>
+            <param name="length">length of int array</param>
+        </member>
+        <member name="M:System.Collections.Generic.BitHelper.#ctor(System.Int32[],System.Int32)">
+            <summary>
+            Instantiates a BitHelper with a heap alloc'd array of ints
+            </summary>
+            <param name="bitArray">int array to hold bits</param>
+            <param name="length">length of int array</param>
+        </member>
+        <member name="M:System.Collections.Generic.BitHelper.MarkBit(System.Int32)">
+            <summary>
+            Mark bit at specified position
+            </summary>
+            <param name="bitPosition"></param>
+        </member>
+        <member name="M:System.Collections.Generic.BitHelper.IsMarked(System.Int32)">
+            <summary>
+            Is bit at specified position marked?
+            </summary>
+            <param name="bitPosition"></param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Collections.Generic.BitHelper.ToIntArrayLength(System.Int32)">
+            <summary>
+            How many ints must be allocated to represent n bits. Returns (n+31)/32, but 
+            avoids overflow
+            </summary>
+            <param name="n"></param>
+            <returns></returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:System.Collections.Generic.Customized.HashSet`1" -->
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.#ctor(System.Collections.Generic.IEnumerable{`0},System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+            Implementation Notes:
+            Since resizes are relatively expensive (require rehashing), this attempts to minimize 
+            the need to resize by setting the initial capacity based on size of collection. 
+            </summary>
+            <param name="collection"></param>
+            <param name="comparer"></param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:System.Collections.Generic.Customized.HashSet`1.System#Collections#Generic#ICollection{T}#Add(`0)" -->
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.Clear">
+            <summary>
+            Remove all items from this set. This clears the elements but not the underlying 
+            buckets and slots array. Follow this call by TrimExcess to release these.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.Contains(`0)">
+            <summary>
+            Checks if this hashset contains the item
+            </summary>
+            <param name="item">item to check for containment</param>
+            <returns>true if item contained; false if not</returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.CopyTo(`0[],System.Int32)">
+            <summary>
+            Copy items in this hashset to array, starting at arrayIndex
+            </summary>
+            <param name="array">array to add items to</param>
+            <param name="arrayIndex">index to start at</param>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.Remove(`0)">
+            <summary>
+            Remove item from this hashset
+            </summary>
+            <param name="item">item to remove</param>
+            <returns>true if removed; false if not (i.e. if the item wasn't in the HashSet)</returns>
+        </member>
+        <member name="P:System.Collections.Generic.Customized.HashSet`1.Count">
+            <summary>
+            Number of elements in this hashset
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.Customized.HashSet`1.System#Collections#Generic#ICollection{T}#IsReadOnly">
+            <summary>
+            Whether this is readonly
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.Add(`0)">
+            <summary>
+            Add item to this HashSet. Returns bool indicating whether item was added (won't be 
+            added if already present)
+            </summary>
+            <param name="item"></param>
+            <returns>true if added, false if already present</returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.UnionWith(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Take the union of this HashSet with other. Modifies this set.
+            
+            Implementation note: GetSuggestedCapacity (to increase capacity in advance avoiding 
+            multiple resizes ended up not being useful in practice; quickly gets to the 
+            point where it's a wasteful check.
+            </summary>
+            <param name="other">enumerable with items to add</param>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.IntersectWith(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Takes the intersection of this set with other. Modifies this set.
+            
+            Implementation Notes: 
+            We get better perf if other is a hashset using same equality comparer, because we 
+            get constant contains check in other. Resulting cost is O(n1) to iterate over this.
+            
+            If we can't go above route, iterate over the other and mark intersection by checking
+            contains in this. Then loop over and delete any unmarked elements. Total cost is n2+n1. 
+            
+            Attempts to return early based on counts alone, using the property that the 
+            intersection of anything with the empty set is the empty set.
+            </summary>
+            <param name="other">enumerable with items to add </param>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.ExceptWith(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Remove items in other from this set. Modifies this set.
+            </summary>
+            <param name="other">enumerable with items to remove</param>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.SymmetricExceptWith(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Takes symmetric difference (XOR) with other and this set. Modifies this set.
+            </summary>
+            <param name="other">enumerable with items to XOR</param>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.IsSubsetOf(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Checks if this is a subset of other.
+            
+            Implementation Notes:
+            The following properties are used up-front to avoid element-wise checks:
+            1. If this is the empty set, then it's a subset of anything, including the empty set
+            2. If other has unique elements according to this equality comparer, and this has more
+            elements than other, then it can't be a subset.
+            
+            Furthermore, if other is a hashset using the same equality comparer, we can use a 
+            faster element-wise check.
+            </summary>
+            <param name="other"></param>
+            <returns>true if this is a subset of other; false if not</returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.IsProperSubsetOf(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Checks if this is a proper subset of other (i.e. strictly contained in)
+            
+            Implementation Notes:
+            The following properties are used up-front to avoid element-wise checks:
+            1. If this is the empty set, then it's a proper subset of a set that contains at least
+            one element, but it's not a proper subset of the empty set.
+            2. If other has unique elements according to this equality comparer, and this has >=
+            the number of elements in other, then this can't be a proper subset.
+            
+            Furthermore, if other is a hashset using the same equality comparer, we can use a 
+            faster element-wise check.
+            </summary>
+            <param name="other"></param>
+            <returns>true if this is a proper subset of other; false if not</returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.IsSupersetOf(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Checks if this is a superset of other
+            
+            Implementation Notes:
+            The following properties are used up-front to avoid element-wise checks:
+            1. If other has no elements (it's the empty set), then this is a superset, even if this
+            is also the empty set.
+            2. If other has unique elements according to this equality comparer, and this has less 
+            than the number of elements in other, then this can't be a superset
+            
+            </summary>
+            <param name="other"></param>
+            <returns>true if this is a superset of other; false if not</returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.IsProperSupersetOf(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Checks if this is a proper superset of other (i.e. other strictly contained in this)
+            
+            Implementation Notes: 
+            This is slightly more complicated than above because we have to keep track if there
+            was at least one element not contained in other.
+            
+            The following properties are used up-front to avoid element-wise checks:
+            1. If this is the empty set, then it can't be a proper superset of any set, even if 
+            other is the empty set.
+            2. If other is an empty set and this contains at least 1 element, then this is a proper
+            superset.
+            3. If other has unique elements according to this equality comparer, and other's count
+            is greater than or equal to this count, then this can't be a proper superset
+            
+            Furthermore, if other has unique elements according to this equality comparer, we can
+            use a faster element-wise check.
+            </summary>
+            <param name="other"></param>
+            <returns>true if this is a proper superset of other; false if not</returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.Overlaps(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Checks if this set overlaps other (i.e. they share at least one item)
+            </summary>
+            <param name="other"></param>
+            <returns>true if these have at least one common element; false if disjoint</returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.SetEquals(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Checks if this and other contain the same elements. This is set equality: 
+            duplicates and order are ignored
+            </summary>
+            <param name="other"></param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.RemoveWhere(System.Predicate{`0})">
+            <summary>
+            Remove elements that match specified predicate. Returns the number of elements removed
+            </summary>
+            <param name="match"></param>
+            <returns></returns>
+        </member>
+        <member name="P:System.Collections.Generic.Customized.HashSet`1.Comparer">
+            <summary>
+            Gets the IEqualityComparer that is used to determine equality of keys for 
+            the HashSet.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.TrimExcess">
+            <summary>
+            Sets the capacity of this list to the size of the list (rounded up to nearest prime),
+            unless count is 0, in which case we release references.
+            
+            This method can be used to minimize a list's memory overhead once it is known that no
+            new elements will be added to the list. To completely clear a list and release all 
+            memory referenced by the list, execute the following statements:
+            
+            list.Clear();
+            list.TrimExcess(); 
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.CreateSetComparer">
+            <summary>
+            Used for deep equality of HashSet testing
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.Initialize(System.Int32)">
+            <summary>
+            Initializes buckets and slots arrays. Uses suggested capacity by finding next prime
+            greater than or equal to capacity.
+            </summary>
+            <param name="capacity"></param>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.IncreaseCapacity">
+            <summary>
+            Expand to new capacity. New capacity is next prime greater than or equal to suggested 
+            size. This is called when the underlying array is filled. This performs no 
+            defragmentation, allowing faster execution; note that this is reasonable since 
+            AddIfNotPresent attempts to insert new elements in re-opened spots.
+            </summary>
+            <param name="sizeSuggestion"></param>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.SetCapacity(System.Int32,System.Boolean)">
+            <summary>
+            Set the underlying buckets array to size newSize and rehash.  Note that newSize
+            *must* be a prime.  It is very likely that you want to call IncreaseCapacity()
+            instead of this method.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.AddIfNotPresent(`0)">
+            <summary>
+            Adds value to HashSet if not contained already
+            Returns true if added and false if already present
+            </summary>
+            <param name="value">value to find</param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.ContainsAllElements(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Checks if this contains of other's elements. Iterates over other's elements and 
+            returns false as soon as it finds an element in other that's not in this.
+            Used by SupersetOf, ProperSupersetOf, and SetEquals.
+            </summary>
+            <param name="other"></param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.IsSubsetOfHashSetWithSameEC(System.Collections.Generic.Customized.HashSet{`0})">
+             <summary>
+             Implementation Notes:
+             If other is a hashset and is using same equality comparer, then checking subset is 
+             faster. Simply check that each element in this is in other.
+             
+             Note: if other doesn't use same equality comparer, then Contains check is invalid,
+             which is why callers must take are of this.
+             
+             If callers are concerned about whether this is a proper subset, they take care of that.
+            
+             </summary>
+             <param name="other"></param>
+             <returns></returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.IntersectWithHashSetWithSameEC(System.Collections.Generic.Customized.HashSet{`0})">
+            <summary>
+            If other is a hashset that uses same equality comparer, intersect is much faster 
+            because we can use other's Contains
+            </summary>
+            <param name="other"></param>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.IntersectWithEnumerable(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Iterate over other. If contained in this, mark an element in bit array corresponding to
+            its position in _slots. If anything is unmarked (in bit array), remove it.
+            
+            This attempts to allocate on the stack, if below StackAllocThreshold.
+            </summary>
+            <param name="other"></param>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.InternalIndexOf(`0)">
+            <summary>
+            Used internally by set operations which have to rely on bit array marking. This is like
+            Contains but returns index in slots array. 
+            </summary>
+            <param name="item"></param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.SymmetricExceptWithUniqueHashSet(System.Collections.Generic.Customized.HashSet{`0})">
+            <summary>
+            if other is a set, we can assume it doesn't have duplicate elements, so use this
+            technique: if can't remove, then it wasn't present in this set, so add.
+            
+            As with other methods, callers take care of ensuring that other is a hashset using the
+            same equality comparer.
+            </summary>
+            <param name="other"></param>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.SymmetricExceptWithEnumerable(System.Collections.Generic.IEnumerable{`0})">
+             <summary>
+             Implementation notes:
+             
+             Used for symmetric except when other isn't a HashSet. This is more tedious because 
+             other may contain duplicates. HashSet technique could fail in these situations:
+             1. Other has a duplicate that's not in this: HashSet technique would add then 
+             remove it.
+             2. Other has a duplicate that's in this: HashSet technique would remove then add it
+             back.
+             In general, its presence would be toggled each time it appears in other. 
+             
+             This technique uses bit marking to indicate whether to add/remove the item. If already
+             present in collection, it will get marked for deletion. If added from other, it will
+             get marked as something not to remove.
+            
+             </summary>
+             <param name="other"></param>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.AddOrGetLocation(`0,System.Int32@)">
+            <summary>
+            Add if not already in hashset. Returns an out param indicating index where added. This 
+            is used by SymmetricExcept because it needs to know the following things:
+            - whether the item was already present in the collection or added from other
+            - where it's located (if already present, it will get marked for removal, otherwise
+            marked for keeping)
+            </summary>
+            <param name="value"></param>
+            <param name="location"></param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.CheckUniqueAndUnfoundElements(System.Collections.Generic.IEnumerable{`0},System.Boolean)">
+            <summary>
+            Determines counts that can be used to determine equality, subset, and superset. This
+            is only used when other is an IEnumerable and not a HashSet. If other is a HashSet
+            these properties can be checked faster without use of marking because we can assume 
+            other has no duplicates.
+            
+            The following count checks are performed by callers:
+            1. Equals: checks if unfoundCount = 0 and uniqueFoundCount = _count; i.e. everything 
+            in other is in this and everything in this is in other
+            2. Subset: checks if unfoundCount >= 0 and uniqueFoundCount = _count; i.e. other may
+            have elements not in this and everything in this is in other
+            3. Proper subset: checks if unfoundCount > 0 and uniqueFoundCount = _count; i.e
+            other must have at least one element not in this and everything in this is in other
+            4. Proper superset: checks if unfound count = 0 and uniqueFoundCount strictly less
+            than _count; i.e. everything in other was in this and this had at least one element
+            not contained in other.
+            
+            An earlier implementation used delegates to perform these checks rather than returning
+            an ElementCount struct; however this was changed due to the perf overhead of delegates.
+            </summary>
+            <param name="other"></param>
+            <param name="returnIfUnfound">Allows us to finish faster for equals and proper superset
+            because unfoundCount must be 0.</param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.HashSetEquals(System.Collections.Generic.Customized.HashSet{`0},System.Collections.Generic.Customized.HashSet{`0},System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+            Internal method used for HashSetEqualityComparer. Compares set1 and set2 according 
+            to specified comparer.
+            
+            Because items are hashed according to a specific equality comparer, we have to resort
+            to n^2 search if they're using different equality comparers.
+            </summary>
+            <param name="set1"></param>
+            <param name="set2"></param>
+            <param name="comparer"></param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.AreEqualityComparersEqual(System.Collections.Generic.Customized.HashSet{`0},System.Collections.Generic.Customized.HashSet{`0})">
+            <summary>
+            Checks if equality comparers are equal. This is used for algorithms that can
+            speed up if it knows the other item has unique elements. I.e. if they're using 
+            different equality comparers, then uniqueness assumption between sets break.
+            </summary>
+            <param name="set1"></param>
+            <param name="set2"></param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Collections.Generic.Customized.HashSet`1.InternalGetHashCode(`0)">
+            <summary>
+            Workaround Comparers that throw ArgumentNullException for GetHashCode(null).
+            </summary>
+            <param name="item"></param>
+            <returns>hash code</returns>
+        </member>
+        <member name="T:System.Collections.Generic.Customized.HashSetEqualityComparer`1">
+            <summary>
+            Equality comparer for hashsets of hashsets
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+    </members>
+</doc>
