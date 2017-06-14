@@ -23,7 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\RNA.Search.XML</DocumentationFile>
+    <DocumentationFile>Bin\Debug\RNA.Search.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
     <StartArguments>--input "../../../tests/data/bio/synth_for_semen/simplification"</StartArguments>
   </PropertyGroup>
@@ -35,7 +35,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\RNA.Search.XML</DocumentationFile>
+    <DocumentationFile>Bin\Release\RNA.Search.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
     <StartArguments>--input "../../../tests/data/synth_for_semen/simplification"</StartArguments>
   </PropertyGroup>
@@ -81,52 +81,52 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="YC.AbstractAnalysis.Common">
-      <HintPath>..\..\bin\Debug\v40\YC.AbstractAnalysis.Common.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.AbstractAnalysis.Common.dll</HintPath>
     </Reference>
     <Reference Include="YC.AbstractLexer.Interpreter">
-      <HintPath>..\..\bin\Debug\v40\YC.AbstractLexer.Interpreter.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.AbstractLexer.Interpreter.dll</HintPath>
     </Reference>
     <Reference Include="YC.AST.Common">
-      <HintPath>..\..\bin\Debug\v40\YC.AST.Common.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.AST.Common.dll</HintPath>
     </Reference>
     <Reference Include="YC.Common">
-      <HintPath>..\..\bin\Debug\v40\YC.Common.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.Common.dll</HintPath>
     </Reference>
     <Reference Include="YC.Constraints">
-      <HintPath>..\..\bin\Debug\v40\YC.Constraints.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.Constraints.dll</HintPath>
     </Reference>
     <Reference Include="YC.Conversions">
-      <HintPath>..\..\bin\Debug\v40\YC.Conversions.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.Conversions.dll</HintPath>
     </Reference>
     <Reference Include="YC.FsYaccFrontend">
-      <HintPath>..\..\bin\Debug\v40\YC.FsYaccFrontend.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.FsYaccFrontend.dll</HintPath>
     </Reference>
     <Reference Include="YC.Generators.Common">
-      <HintPath>..\..\bin\Debug\v40\YC.Generators.Common.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.Generators.Common.dll</HintPath>
     </Reference>
     <Reference Include="YC.GLLAbstractParser">
-      <HintPath>..\..\bin\Debug\v40\YC.GLLAbstractParser.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.GLLAbstractParser.dll</HintPath>
     </Reference>
     <Reference Include="YC.GLLGenerator">
-      <HintPath>..\..\bin\Debug\v40\YC.GLLGenerator.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.GLLGenerator.dll</HintPath>
     </Reference>
     <Reference Include="YC.Parser.Common">
-      <HintPath>..\..\bin\Debug\v40\YC.Parser.Common.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.Parser.Common.dll</HintPath>
     </Reference>
     <Reference Include="YC.PrettyPrinter">
-      <HintPath>..\..\bin\Debug\v40\YC.PrettyPrinter.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.PrettyPrinter.dll</HintPath>
     </Reference>
     <Reference Include="YC.Utils.SourceText">
-      <HintPath>..\..\bin\Debug\v40\YC.Utils.SourceText.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.Utils.SourceText.dll</HintPath>
     </Reference>
     <Reference Include="YC.YaccConstructor">
-      <HintPath>..\..\bin\Debug\v40\YC.YaccConstructor.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.YaccConstructor.dll</HintPath>
     </Reference>
     <Reference Include="YC.YardFrontend">
-      <HintPath>..\..\bin\Debug\v40\YC.YardFrontend.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.YardFrontend.dll</HintPath>
     </Reference>
     <Reference Include="YC.YardPrinter">
-      <HintPath>..\..\bin\Debug\v40\YC.YardPrinter.dll</HintPath>
+      <HintPath>..\..\Bin\Debug\v40\YC.YardPrinter.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Choose>
