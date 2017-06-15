@@ -23,9 +23,9 @@ let needChangeDirectory =
 let grammar = if needChangeDirectory then @"C:\Code\YC.Bio" else @"..\..\..\.." + @"\src\YC.GrammarZOO\Bio\16s\R16S_19_27.yrd"
 
 //let dataPath = @"..\..\..\data\16s\trainset15_092015.fa"
-//let dataPath = @"..\..\..\data\16s\HOMD_16S_rRNA_RefSeq_V14.5.fasta"
+let dataPath = @"..\..\..\data\16s\HOMD_16S_rRNA_RefSeq_V14.5.fasta"
 //let dataPath = @"..\..\..\data\16s\59127.fna"
-let dataPath = if needChangeDirectory then @"C:\Code\YC.Bio\tests" else @"..\..\.." + @"\data\16s\SILVA_128_SSURef_Nr99_tax_silva.fasta"
+//let dataPath = if needChangeDirectory then @"C:\Code\YC.Bio\tests" else @"..\..\.." + @"\data\16s\SILVA_128_SSURef_Nr99_tax_silva.fasta"
 
 let isFasta = false
 
