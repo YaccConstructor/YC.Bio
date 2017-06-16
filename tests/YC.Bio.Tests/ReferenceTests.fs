@@ -16,42 +16,46 @@ open Yard.Frontends.YardFrontend
 open Yard.Generators.GLL
 open Yard.Core.Conversions.ExpandMeta
 
-let needChangeDirectory = 
-    (@"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
-    || (@"C:\Users\artem\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
+//let needChangeDirectory = 
+//    (@"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
+//    || (@"C:\Users\artem\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
 
-let grammar = if needChangeDirectory then @"C:\Code\YC.Bio" else @"..\..\..\.." + @"\src\YC.GrammarZOO\Bio\16s\R16S_19_27.yrd"
-
+//let grammar = if needChangeDirectory then @"C:\Code\YC.Bio" else @"..\..\.." + @"\src\YC.GrammarZOO\Bio\16s\R16S_19_27.yrd"
+let grammar = @"..\..\..\..\src\YC.GrammarZOO\Bio\16s\R16S_19_27.yrd"
 //let dataPath = @"..\..\..\data\16s\trainset15_092015.fa"
-let dataPath = @"..\..\..\data\16s\HOMD_16S_rRNA_RefSeq_V14.5.fasta"
+//let dataPath = @"..\..\tests\data\16s\HOMD_16S_rRNA_RefSeq_V14.5.fasta"
 //let dataPath = @"..\..\..\data\16s\59127.fna"
 //let dataPath = if needChangeDirectory then @"C:\Code\YC.Bio\tests" else @"..\..\.." + @"\data\16s\SILVA_128_SSURef_Nr99_tax_silva.fasta"
 
 let isFasta = false
 
-let data = 
+let getData dataPath isFasta = 
     if not isFasta
     then
         let d = new ResizeArray<_>()
+        
         System.IO.File.ReadAllLines(dataPath)
-        |> Array.iteri(fun i x -> if i % 2 <> 0 then d.Add(x))
+        |> Array.pairwise
+        |> Array.iteri(fun i x -> if i % 2 = 0 then d.Add(x))
         d.ToArray()
     else
         let d = new System.Text.StringBuilder()
-        let flag = ref false
+        let meta = ref ""
         let lst = new ResizeArray<_>()
-        for s in System.IO.File.ReadAllLines(dataPath).[..500] do
+        for s in System.IO.File.ReadAllLines(dataPath) do
             if s.[0] = '>'
             then
-                if !flag
+                if !meta <> ""
                 then 
-                    lst.Add(d.ToString())
+                    lst.Add(!meta, d.ToString())
                     d.Clear() |> ignore
+                    meta := s
                 else
-                    flag := true
+                    meta := s
             else
                 d.Append s |> ignore
-        lst.ToArray().[..20]
+        lst.Add(!meta, d.ToString())
+        lst.ToArray()
 
 
 //let inputFilesPath = 
@@ -107,18 +111,49 @@ let getLinearInputWithAllStartingPos line =
 let isParsed = 
     Yard.Generators.GLL.AbstractParser.isParsed
 
-type str =
-    | Str of string
+
+let extractName (meta : string) =
+    meta.Split([|' '; ';'|]).[1]
+
+let collectedResult = new Dictionary<_,int * int>()
+let collectResult isParsed (name : string) =
+    
+    printfn "name: %s" name
+//    if collectedResult = null then printfn "collectedResult is null"
+//    collectedResult.ContainsKey(name) |> printfn "Contains : %A"
+//    let contains, (parsed, notParsed) = collectedResult.(name)
+    if collectedResult.ContainsKey(name)
+    then
+        let (parsed, notParsed) = collectedResult.[name]
+        collectedResult.[name] <- (parsed + (if isParsed then 1 else 0), notParsed + if isParsed then 0 else 1)
+    else
+        collectedResult.Add(name, ((if isParsed then 1 else 0), if isParsed then 0 else 1))
+
+type Msg =
+    | Str of string * string
+    | Sum
 
 [<TestFixture>]
 module ``reference tests`` =
-    let testData = 
-        data.[..29]
-        |> Seq.mapi(fun i s -> TestCaseData(i, Str s))
+//    let testData = 
+//        (getData @"..\..\..\tests\data\16s\HOMD_16S_rRNA_RefSeq_V14.5.fasta" false).[..99]
+//        |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
 
-    [<TestCaseSource("testData")>]
-    let ``Check first 30 sequences`` = function 
-        | i, Str line -> 
+    let semenData =
+        try
+            (getData @"..\..\..\data\16s\SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true).[..400]
+            |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
+        with
+            | _ -> System.IO.File.WriteAllText("ASDASDASD.txt", "ASFJ:OASIJFOIASFJ")
+                   [|TestCaseData(0, Sum)|] |> Seq.ofArray
+
+    let writeSummary = [|TestCaseData(0, Sum)|]
+
+    //[<TestCaseSource("testData")>]
+    [<TestCaseSource("semenData")>]
+    [<TestCaseSource("writeSummary")>]
+    let ``Check sequence`` = function 
+        | i, Str (meta, line) -> 
             let input  = getLinearInputWithAllStartingPos line
             //let tree = buildAst parserSource input
             let res = getAllRangesForStartState parserSource input
@@ -149,7 +184,7 @@ module ``reference tests`` =
                             |> Seq.minBy(fun (x,y) -> x)
                         let rightmost = 
                             filtered
-                            |> Seq.minBy(fun (x,y) -> y)
+                            |> Seq.maxBy(fun (x,y) -> y)
                         if leftmost = rightmost
                         then 
                             false
@@ -163,7 +198,33 @@ module ``reference tests`` =
 
     //            res
     //            |> Seq.iter (fun (x,y) -> printfn "%i - %i : %i" x y (y - x))
-              
-            Assert.AreEqual(isParsed, true, sprintf "Line %i wasn't parsed:\n    %s" (i+1) reason)
-    //        if not isParsed then printfn "Line %i wasn't parsed:\n    %s" (i+1) reason
-    //        else printfn "Line %i parsed" (i + 1)
+            let name = extractName meta 
+             
+            collectResult isParsed name
+
+            Assert.AreEqual(isParsed || not (name = "bacteria"), true, sprintf "Line %i wasn't parsed:\n%s" (i+1) reason)
+            if not isParsed then printfn "Line %i wasn't parsed:\n    %s" (i+1) reason
+            else printfn "Line %i parsed" (i + 1)
+        | _, Sum -> 
+            printfn "\nTests summary:"
+            printfn "Name      parsed notParsed"
+            for kvp in collectedResult do
+                let name,(parsed, notParsed) = kvp.Key, kvp.Value
+                printf "%s" name
+                for i in 1..(10 - name.Length) do
+                    printf " "
+                parsed.ToString() |> printf "%s" 
+                for i in 1..(7 - parsed.ToString().Length) do
+                    printf " "
+                notParsed.ToString() |> printf "%s\n"
+
+//[<EntryPointAttribute>]
+//let main arg = 
+//    let line = (getData @"..\..\..\tests\data\16s\VKM_Ac-1815D.fa" true).[0]
+//    let before = System.DateTime.Now
+//
+//    let input  = getLinearInputWithAllStartingPos line
+//    let res = getAllRangesForStartState parserSource input
+//    System.IO.File.WriteAllLines("resultOfGenomeParsing.txt", res |> Seq.map(fun x -> x.ToString()))
+//    printfn "Time: %A" (System.DateTime.Now - before)
+//    0
