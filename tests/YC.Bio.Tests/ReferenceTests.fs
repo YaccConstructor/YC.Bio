@@ -100,7 +100,7 @@ let tokenizer (x : char) =
 let getLinearInputWithAllStartingPos line = 
     let tokens = 
         getTokens line
-            |> Array.map tokenizer
+        |> Array.map tokenizer
 
     //printfn "%A" tokens
     let startPoss = 
@@ -111,9 +111,38 @@ let getLinearInputWithAllStartingPos line =
 let isParsed = 
     Yard.Generators.GLL.AbstractParser.isParsed
 
-
 let extractName (meta : string) =
     meta.Split([|' '; ';'|]).[1]
+
+let extractIntervals (meta: string) =
+    meta.Split(',').[2].Trim().Split() 
+    |> Array.map (fun s -> let p = s.Split(':') in (int p.[0], int p.[1]))
+
+let parallelSearch16s blockSize partLength overlap (genome: string) =
+    let blockLength = partLength * blockSize
+    let blocksNum = genome.Length / blockLength
+    let realStartPos i j = i * blockLength + j * partLength
+    let result = new ResizeArray<_>()
+
+    let getPart blockNum partNum =
+        let pos = realStartPos blockNum partNum
+        let part = 
+            if genome.Length - pos > partLength + overlap
+            then genome.[pos .. pos + partLength + overlap]
+            elif genome.Length - 1 > pos
+            then genome.[pos ..]
+            else ""  
+        getLinearInputWithAllStartingPos part
+
+    for i in 0 .. blocksNum do        
+        [| for j in 0 .. blockSize - 1 -> getPart i j |]
+        |> Array.Parallel.map (getAllRangesForStartState parserSource)
+        |> Array.iteri (fun j s ->
+                            let pos = realStartPos i j
+                            in s   
+                               |> Seq.filter (fun (x, y) -> y - x > 200<positionInInput>)
+                               |> Seq.iter (fun (x, y) -> result.Add (pos + int x, pos + int y)))
+    result
 
 let collectedResult = new Dictionary<_,int * int>()
 let collectResult isParsed (name : string) =
@@ -146,9 +175,28 @@ module ``reference tests`` =
         with
             | _ -> System.IO.File.WriteAllText("ASDASDASD.txt", "ASFJ:OASIJFOIASFJ")
                    [|TestCaseData(0, Sum)|] |> Seq.ofArray
-
+    
+    let completeGenData =
+        getData @"..\..\..\data\complete_genome\ATCC_35405.txt" true
+        |> Seq.map(fun x -> TestCaseData(Str x))
+        
     let writeSummary = [|TestCaseData(0, Sum)|]
 
+    [<TestCaseSource("completeGenData")>]
+    let ``Identify 16s in complete genome`` = function
+        | Str (meta, genome) ->
+            let intervals16s = extractIntervals meta
+
+            let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+            let result = parallelSearch16s 4 5000 600 genome
+            stopWatch.Stop()
+
+            //result |> Seq.iter (fun (x, y) -> printfn "%i : %i" x y)
+            //TODO  report
+            printfn "%f" stopWatch.Elapsed.TotalSeconds 
+
+        | _ -> failwith ""
+                   
     //[<TestCaseSource("testData")>]
     [<TestCaseSource("semenData")>]
     [<TestCaseSource("writeSummary")>]
