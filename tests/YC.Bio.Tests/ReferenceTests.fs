@@ -21,7 +21,7 @@ open Yard.Core.Conversions.ExpandMeta
 //    || (@"C:\Users\artem\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
 
 //let grammar = if needChangeDirectory then @"C:\Code\YC.Bio" else @"..\..\.." + @"\src\YC.GrammarZOO\Bio\16s\R16S_19_27.yrd"
-let grammar = @"..\..\..\..\src\YC.GrammarZOO\Bio\16s\R16S_19_27.yrd"
+let grammar = @"../../../../src/YC.GrammarZOO/Bio/16s/R16S_19_27.yrd"
 //let dataPath = @"..\..\..\data\16s\trainset15_092015.fa"
 //let dataPath = @"..\..\tests\data\16s\HOMD_16S_rRNA_RefSeq_V14.5.fasta"
 //let dataPath = @"..\..\..\data\16s\59127.fna"
@@ -140,12 +140,8 @@ module ``reference tests`` =
 //        |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
 
     let semenData =
-        try
-            (getData @"..\..\..\data\16s\SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true).[..400]
-            |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
-        with
-            | _ -> System.IO.File.WriteAllText("ASDASDASD.txt", "ASFJ:OASIJFOIASFJ")
-                   [|TestCaseData(0, Sum)|] |> Seq.ofArray
+        (getData @"../../../data/16s/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true).[..400]
+        |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
 
     let writeSummary = [|TestCaseData(0, Sum)|]
 
