@@ -22,7 +22,7 @@ open YC.Bio.Statistics
 //    || (@"C:\Users\artem\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
 
 //let grammar = if needChangeDirectory then @"C:\Code\YC.Bio" else @"..\..\.." + @"\src\YC.GrammarZOO\Bio\16s\R16S_19_27.yrd"
-let grammar = @"..\..\..\..\src\YC.GrammarZOO\Bio\16s\R16S_19_27.yrd"
+let grammar = @"../../../../src/YC.GrammarZOO/Bio/16s/R16S_19_27.yrd"
 //let dataPath = @"..\..\..\data\16s\trainset15_092015.fa"
 //let dataPath = @"..\..\tests\data\16s\HOMD_16S_rRNA_RefSeq_V14.5.fasta"
 //let dataPath = @"..\..\..\data\16s\59127.fna"
@@ -115,6 +115,9 @@ let isParsed =
 let extractName (meta : string) =
     meta.Split([|' '; ';'|]).[1]
 
+let extractID (meta : string) =
+    meta.Split([|' '; '>'|], System.StringSplitOptions.RemoveEmptyEntries).[0]
+
 let parallelSearch16s blockSize partLength overlap min16sLength (genome: string) =
     let blockLength = partLength * blockSize
     let blocksNum = genome.Length / blockLength
@@ -181,12 +184,9 @@ module ``reference tests`` =
 //        |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
 
     let semenData =
-        try
-            (getData @"..\..\..\data\16s\SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true).[..400]
-            |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
-        with
-            | _ -> System.IO.File.WriteAllText("ASDASDASD.txt", "ASFJ:OASIJFOIASFJ")
-                   [|TestCaseData(0, Sum)|] |> Seq.ofArray
+        let a = (getData @"../../../data/16s/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true).[..400]
+        [a.[157] ; a.[183];a.[184]]
+        |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
     
     let completeGenData =
         getData @"../../../data/complete_genome/ATCC_35405.txt" true
@@ -253,18 +253,19 @@ module ``reference tests`` =
                         else
                             false
                             , sprintf "Leftmost: %i - %i, %i\n" (fst leftmost) (snd leftmost) (snd leftmost - fst leftmost)
-                            + sprintf "Rightmost: %i - %i, %i" (fst rightmost) (snd rightmost) (snd rightmost - fst rightmost)
+                            + sprintf "    Rightmost: %i - %i, %i" (fst rightmost) (snd rightmost) (snd rightmost - fst rightmost)
                 else
                     true, ""
 
     //            res
     //            |> Seq.iter (fun (x,y) -> printfn "%i - %i : %i" x y (y - x))
             let name = extractName meta 
+            let id = extractID meta
              
             collectResult isParsed name
 
-            Assert.AreEqual(isParsed || not (name = "bacteria"), true, sprintf "Line %i wasn't parsed:\n%s" (i+1) reason)
-            if not isParsed then printfn "Line %i wasn't parsed:\n    %s" (i+1) reason
+            Assert.AreEqual(isParsed || not (name = "bacteria"), true, sprintf "Line %i( %s ) wasn't parsed:\n%s" (i+1) id reason)
+            if not isParsed then printfn "Line %i( %s ) wasn't parsed:\n    %s" (i+1) id reason
             else printfn "Line %i parsed" (i + 1)
         | _, Sum -> 
             printfn "\nTests summary:"
