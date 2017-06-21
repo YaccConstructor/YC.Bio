@@ -115,6 +115,9 @@ let isParsed =
 let extractName (meta : string) =
     meta.Split([|' '; ';'|]).[1]
 
+let extractID (meta : string) =
+    meta.Split([|' '; '>'|], System.StringSplitOptions.RemoveEmptyEntries).[0]
+
 let collectedResult = new Dictionary<_,int * int>()
 let collectResult isParsed (name : string) =
     
@@ -140,7 +143,8 @@ module ``reference tests`` =
 //        |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
 
     let semenData =
-        (getData @"../../../data/16s/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true).[..400]
+        let a = (getData @"../../../data/16s/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true).[..400]
+        [a.[157] ; a.[183];a.[184]]
         |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
 
     let writeSummary = [|TestCaseData(0, Sum)|]
@@ -188,18 +192,19 @@ module ``reference tests`` =
                         else
                             false
                             , sprintf "Leftmost: %i - %i, %i\n" (fst leftmost) (snd leftmost) (snd leftmost - fst leftmost)
-                            + sprintf "Rightmost: %i - %i, %i" (fst rightmost) (snd rightmost) (snd rightmost - fst rightmost)
+                            + sprintf "    Rightmost: %i - %i, %i" (fst rightmost) (snd rightmost) (snd rightmost - fst rightmost)
                 else
                     true, ""
 
     //            res
     //            |> Seq.iter (fun (x,y) -> printfn "%i - %i : %i" x y (y - x))
             let name = extractName meta 
+            let id = extractID meta
              
             collectResult isParsed name
 
-            Assert.AreEqual(isParsed || not (name = "bacteria"), true, sprintf "Line %i wasn't parsed:\n%s" (i+1) reason)
-            if not isParsed then printfn "Line %i wasn't parsed:\n    %s" (i+1) reason
+            Assert.AreEqual(isParsed || not (name = "bacteria"), true, sprintf "Line %i( %s ) wasn't parsed:\n%s" (i+1) id reason)
+            if not isParsed then printfn "Line %i( %s ) wasn't parsed:\n    %s" (i+1) id reason
             else printfn "Line %i parsed" (i + 1)
         | _, Sum -> 
             printfn "\nTests summary:"
