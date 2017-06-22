@@ -15,6 +15,7 @@ open Yard.Generators.GLL.AbstractParser
 open Yard.Frontends.YardFrontend
 open Yard.Generators.GLL
 open Yard.Core.Conversions.ExpandMeta
+open YC.Bio.Statistics
 
 //let needChangeDirectory = 
 //    (@"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
@@ -100,7 +101,7 @@ let tokenizer (x : char) =
 let getLinearInputWithAllStartingPos line = 
     let tokens = 
         getTokens line
-            |> Array.map tokenizer
+        |> Array.map tokenizer
 
     //printfn "%A" tokens
     let startPoss = 
@@ -111,13 +112,53 @@ let getLinearInputWithAllStartingPos line =
 let isParsed = 
     Yard.Generators.GLL.AbstractParser.isParsed
 
-
 let extractName (meta : string) =
     meta.Split([|' '; ';'|]).[1]
 
 let extractID (meta : string) =
     meta.Split([|' '; '>'|], System.StringSplitOptions.RemoveEmptyEntries).[0]
 
+let parallelSearch16s blockSize partLength overlap min16sLength (genome: string) =
+    let blockLength = partLength * blockSize
+    let blocksNum = genome.Length / blockLength
+    let realStartPos i j = i * blockLength + j * partLength
+    let result = new ResizeArray<_>()
+
+    let getPart blockNum partNum =
+        let pos = realStartPos blockNum partNum
+        let part = 
+            if genome.Length - pos > partLength + overlap
+            then genome.[pos .. pos + partLength + overlap]
+            elif genome.Length - 1 > pos
+            then genome.[pos ..]
+            else ""  
+        getLinearInputWithAllStartingPos part
+    
+    let rec selectRepresentatives i max selected pairs =
+        match pairs with
+        | [] -> max :: selected |> List.rev |> Array.ofList
+        | (x, y) :: t -> 
+            if x - i > 50
+            then selectRepresentatives x (x, y) (max :: selected) t
+            elif y - x > snd max - fst max
+            then selectRepresentatives i (x, y) selected t
+            else selectRepresentatives i max selected t
+
+    for i in 0 .. blocksNum do      
+        [| for j in 0 .. blockSize - 1 -> getPart i j |]
+        |> Array.Parallel.map (getAllRangesForStartState parserSource)
+        |> Array.iteri (fun j s ->
+                            let pos = realStartPos i j
+                            in s   
+                               |> Seq.filter (fun (x, y) -> y - x > min16sLength * 1<positionInInput>)
+                               |> Seq.iter (fun (x, y) -> result.Add (pos + int x, pos + int y)))    
+    if result.Count = 0
+    then [||]
+    else
+        let resultList = List.ofSeq result
+        let elem = resultList.[0]
+        selectRepresentatives (fst elem) elem [] resultList
+    
 let collectedResult = new Dictionary<_,int * int>()
 let collectResult isParsed (name : string) =
     
@@ -149,9 +190,29 @@ module ``reference tests`` =
         //data.[800..900]
         [data.[533]; data.[614];data.[714]; data.[715]]
         |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
-
+    
+    let completeGenData =
+        getData @"../../../data/complete_genome/ATCC_35405.txt" true
+        |> Seq.map(fun x -> TestCaseData(Str x))
+        
     let writeSummary = [|TestCaseData(0, Sum)|]
 
+    [<TestCaseSource("completeGenData")>]
+    let ``Identify 16s in complete genome`` = function
+        | Str (meta, genome) ->
+            let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+            let result = parallelSearch16s 4 5000 600 250 genome
+            stopWatch.Stop()
+
+            let report = new OrganismReport(meta, result)
+            System.IO.File.WriteAllText("report.txt", report.ToString())
+            printfn "correct: %i" report.CorrectResults.Length
+            printfn "incorrect: %i" report.IncorrectResults.Length
+            //result |> Array.iter (fun (x, y) -> printfn "%i : %i" x y)
+            printfn "%f" stopWatch.Elapsed.TotalSeconds 
+            
+        | _ -> failwith ""
+                   
     //[<TestCaseSource("testData")>]
     [<TestCaseSource("semenData")>]
     [<TestCaseSource("writeSummary")>]
