@@ -121,7 +121,7 @@ let extractID (meta : string) =
 let collectedResult = new Dictionary<_,int * int>()
 let collectResult isParsed (name : string) =
     
-    printfn "name: %s" name
+    //printfn "name: %s" name
 //    if collectedResult = null then printfn "collectedResult is null"
 //    collectedResult.ContainsKey(name) |> printfn "Contains : %A"
 //    let contains, (parsed, notParsed) = collectedResult.(name)
@@ -143,8 +143,11 @@ module ``reference tests`` =
 //        |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
 
     let semenData =
-        let a = (getData @"../../../data/16s/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true).[..400]
-        [a.[157] ; a.[183];a.[184]]
+        let data = (getData @"../../../data/16s/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true)
+        //[[|a.[157]; a.[161]; a.[183]; a.[184]; a.[188]|] ; a.[190..196] ; a.[200..201] ; a.[241..242] ; [|a.[269]; a.[333]; a.[372]; a.[386]|]]
+        //|> Array.concat
+        //data.[800..900]
+        [data.[533]; data.[614];data.[714]; data.[715]]
         |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
 
     let writeSummary = [|TestCaseData(0, Sum)|]
@@ -152,7 +155,7 @@ module ``reference tests`` =
     //[<TestCaseSource("testData")>]
     [<TestCaseSource("semenData")>]
     [<TestCaseSource("writeSummary")>]
-    let ``Check sequence`` = function 
+    let  ``Check sequence`` =  function 
         | i, Str (meta, line) -> 
             let input  = getLinearInputWithAllStartingPos line
             //let tree = buildAst parserSource input
@@ -204,8 +207,11 @@ module ``reference tests`` =
             collectResult isParsed name
 
             Assert.AreEqual(isParsed || not (name = "bacteria"), true, sprintf "Line %i( %s ) wasn't parsed:\n%s" (i+1) id reason)
-            if not isParsed then printfn "Line %i( %s ) wasn't parsed:\n    %s" (i+1) id reason
-            else printfn "Line %i parsed" (i + 1)
+            //if not isParsed then printfn "Line %i( %s ) wasn't parsed:\n    %s" (i+1) id reason
+            //else printfn "Line %i parsed" (i + 1)
+            if (name = "bacteria") && not isParsed
+            then
+                printfn "Line %i( %s ) wasn't parsed:\n    %s" (i+1) id reason
         | _, Sum -> 
             printfn "\nTests summary:"
             printfn "Name      parsed notParsed"
