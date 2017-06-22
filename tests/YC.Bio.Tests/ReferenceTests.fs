@@ -198,6 +198,7 @@ module ``reference tests`` =
     let writeSummary = [|TestCaseData(0, Sum)|]
 
     [<TestCaseSource("completeGenData")>]
+    [<Ignore("too loooong")>]
     let ``Identify 16s in complete genome`` = function
         | Str (meta, genome) ->
             let stopWatch = System.Diagnostics.Stopwatch.StartNew()
