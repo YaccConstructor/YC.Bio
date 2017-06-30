@@ -133,32 +133,34 @@ let parallelSearch16s blockSize partLength overlap min16sLength (genome: string)
             then genome.[pos ..]
             else ""  
         getLinearInputWithAllStartingPos part
-    
-    let rec selectRepresentatives i max selected pairs =
-        match pairs with
-        | [] -> max :: selected |> List.rev |> Array.ofList
-        | (x, y) :: t -> 
-            if x - i > 50
-            then selectRepresentatives x (x, y) (max :: selected) t
-            elif y - x > snd max - fst max
-            then selectRepresentatives i (x, y) selected t
-            else selectRepresentatives i max selected t
-
-    for i in 0 .. blocksNum do      
+  
+    let selectRepresentatives (pairs: seq<_>) = 
+        if Seq.length pairs = 0
+        then []
+        else
+            let h = Seq.head pairs
+            let _, _, res = 
+                pairs                 
+                |> Seq.filter (fun (x, y) -> y - x > min16sLength * 1<positionInInput>)
+                |> Seq.fold    //select the longest result from each group
+                       (fun (pos, max, acc) (x, y) -> 
+                            if x - pos > 50<positionInInput>
+                            then (x, (x, y), max :: acc)                        
+                            elif y - x > snd max - fst max
+                            then (pos, (x, y), acc)
+                            else (pos, max, acc)) 
+                       (fst h, h, [])
+            List.rev res
+                                               
+    for i in 0 .. blocksNum do
         [| for j in 0 .. blockSize - 1 -> getPart i j |]
         |> Array.Parallel.map (getAllRangesForStartState parserSource)
         |> Array.iteri (fun j s ->
                             let pos = realStartPos i j
-                            in s   
-                               |> Seq.filter (fun (x, y) -> y - x > min16sLength * 1<positionInInput>)
-                               |> Seq.iter (fun (x, y) -> result.Add (pos + int x, pos + int y)))    
-    if result.Count = 0
-    then [||]
-    else
-        let resultList = List.ofSeq result
-        let elem = resultList.[0]
-        selectRepresentatives (fst elem) elem [] resultList
-    
+                            in selectRepresentatives s   
+                               |> List.iter (fun (x, y) -> result.Add (pos + int x, pos + int y)))    
+    Array.ofSeq result
+
 let collectedResult = new Dictionary<_,int * int>()
 let collectResult isParsed (name : string) =
     
@@ -193,14 +195,17 @@ module ``reference tests`` =
     
     let completeGenData =
         getData @"../../../data/complete_genome/ATCC_35405.txt" true
-        |> Seq.map(fun x -> TestCaseData(Str x))
+        |> Seq.map (fun x -> TestCaseData(Str x))
+        //|> Seq.map(fun (x, y) -> TestCaseData(Str (x, y.[610000 .. 620000])))
         
     let writeSummary = [|TestCaseData(0, Sum)|]
 
     [<TestCaseSource("completeGenData")>]
+    [<Ignore("too loooong")>]
     let ``Identify 16s in complete genome`` = function
         | Str (meta, genome) ->
             let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+            printfn "%i" genome.Length
             let result = parallelSearch16s 4 5000 600 250 genome
             stopWatch.Stop()
 
