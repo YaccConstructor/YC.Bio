@@ -1,25 +1,117 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>ffbc56cc-6fa9-40fa-bf23-5404fd5e2d4a</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>BioGraphLoader</RootNamespace>
-    <AssemblyName>YC.Bio.GraphLoader</AssemblyName>
-    <Name>Bio.GraphLoader</Name>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <!--<Import Project="../YC.targets" /> -->
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+    <ProjectGuid>462a7ffe-dcfd-4ca5-a88f-24eb0f6d59fd</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>SPPFbuilder</RootNamespace>
+    <AssemblyName>SPPFbuilder</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
+    <Name>SPPFbuilder</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DocumentationFile />
-    <OutputPath>..\..\Bin\Debug\v40</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Debug\SPPFbuilder.XML</DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Release\SPPFbuilder.XML</DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CustomHashSet">
+      <HintPath>..\..\Bin\Debug\v40\CustomHashSet.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Msagl">
+      <HintPath>..\..\..\Code\automatic-graph-layout\GraphLayout\MSAGL\bin\Release\Microsoft.Msagl.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Msagl.Drawing">
+      <HintPath>..\..\..\Code\automatic-graph-layout\GraphLayout\tools\GraphViewerGDI\bin\Release\Microsoft.Msagl.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Msagl.GraphViewerGdi">
+      <HintPath>..\..\..\Code\automatic-graph-layout\GraphLayout\tools\GraphViewerGDI\bin\Release\Microsoft.Msagl.GraphViewerGdi.dll</HintPath>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="YC.AbstractAnalysis.Common">
+      <HintPath>..\..\bin\Debug\v40\YC.AbstractAnalysis.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.AbstractLexer.Interpreter">
+      <HintPath>..\..\bin\Debug\v40\YC.AbstractLexer.Interpreter.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.AST.Common">
+      <HintPath>..\..\bin\Debug\v40\YC.AST.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.Common">
+      <HintPath>..\..\bin\Debug\v40\YC.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.Constraints">
+      <HintPath>..\..\bin\Debug\v40\YC.Constraints.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.Conversions">
+      <HintPath>..\..\bin\Debug\v40\YC.Conversions.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.FsYaccFrontend">
+      <HintPath>..\..\bin\Debug\v40\YC.FsYaccFrontend.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.Generators.Common">
+      <HintPath>..\..\bin\Debug\v40\YC.Generators.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.GLLAbstractParser">
+      <HintPath>..\..\bin\Debug\v40\YC.GLLAbstractParser.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.GLLGenerator">
+      <HintPath>..\..\bin\Debug\v40\YC.GLLGenerator.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.Parser.Common">
+      <HintPath>..\..\bin\Debug\v40\YC.Parser.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.PrettyPrinter">
+      <HintPath>..\..\bin\Debug\v40\YC.PrettyPrinter.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.Utils.SourceText">
+      <HintPath>..\..\bin\Debug\v40\YC.Utils.SourceText.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.YaccConstructor">
+      <HintPath>..\..\bin\Debug\v40\YC.YaccConstructor.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.YardFrontend">
+      <HintPath>..\..\bin\Debug\v40\YC.YardFrontend.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.YardPrinter">
+      <HintPath>..\..\bin\Debug\v40\YC.YardPrinter.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Program.fs" />
+    <None Include="App.config" />
+  </ItemGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
@@ -41,61 +133,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Compile Include="GraphLoader.fs" />
-    <None Include="paket.references" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="YC.AbstractAnalysis.Common">
-      <HintPath>..\..\Bin\Debug\v40\YC.AbstractAnalysis.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.AbstractLexer.Interpreter">
-      <HintPath>..\..\Bin\Debug\v40\YC.AbstractLexer.Interpreter.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.AST.Common">
-      <HintPath>..\..\Bin\Debug\v40\YC.AST.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.Common">
-      <HintPath>..\..\Bin\Debug\v40\YC.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.Constraints">
-      <HintPath>..\..\Bin\Debug\v40\YC.Constraints.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.Conversions">
-      <HintPath>..\..\Bin\Debug\v40\YC.Conversions.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.FsYaccFrontend">
-      <HintPath>..\..\Bin\Debug\v40\YC.FsYaccFrontend.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.Generators.Common">
-      <HintPath>..\..\Bin\Debug\v40\YC.Generators.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.GLLAbstractParser">
-      <HintPath>..\..\Bin\Debug\v40\YC.GLLAbstractParser.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.GLLGenerator">
-      <HintPath>..\..\Bin\Debug\v40\YC.GLLGenerator.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.Parser.Common">
-      <HintPath>..\..\Bin\Debug\v40\YC.Parser.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.PrettyPrinter">
-      <HintPath>..\..\Bin\Debug\v40\YC.PrettyPrinter.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.Utils.SourceText">
-      <HintPath>..\..\Bin\Debug\v40\YC.Utils.SourceText.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.YardFrontend">
-      <HintPath>..\..\Bin\Debug\v40\YC.YardFrontend.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.YardPrinter">
-      <HintPath>..\..\Bin\Debug\v40\YC.YardPrinter.dll</HintPath>
-    </Reference>
-  </ItemGroup>
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3' Or $(TargetFrameworkVersion) == 'v4.7')">
       <ItemGroup>
