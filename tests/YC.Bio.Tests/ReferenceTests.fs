@@ -1,5 +1,7 @@
 module YC.Bio.Tests
 
+open System.IO
+
 open AbstractAnalysis.Common
 
 open Yard.Generators.GLL
@@ -145,7 +147,7 @@ let parallelSearch16s blockSize partLength overlap min16sLength (genome: string)
                 |> Seq.fold    //select the longest result from each group
                        (fun (pos, max, acc) (x, y) -> 
                             if x - pos > 50<positionInInput>
-                            then (x, (x, y), max :: acc)                        
+                            then (x, (x, y), max :: acc)
                             elif y - x > snd max - fst max
                             then (pos, (x, y), acc)
                             else (pos, max, acc)) 
@@ -158,7 +160,7 @@ let parallelSearch16s blockSize partLength overlap min16sLength (genome: string)
         |> Array.iteri (fun j s ->
                             let pos = realStartPos i j
                             in selectRepresentatives s   
-                               |> List.iter (fun (x, y) -> result.Add (pos + int x, pos + int y)))    
+                               |> List.iter (fun (x, y) -> result.Add (pos + int x, pos + int y)))
     Array.ofSeq result
 
 let collectedResult = new Dictionary<_,int * int>()
@@ -175,8 +177,11 @@ let collectResult isParsed (name : string) =
     else
         collectedResult.Add(name, ((if isParsed then 1 else 0), if isParsed then 0 else 1))
 
+let reports = new ResizeArray<_>()
+
 type Msg =
     | Str of string * string
+    | File of string
     | Sum
 
 [<TestFixture>]
@@ -191,33 +196,45 @@ module ``reference tests`` =
         //|> Array.concat
         //data.[800..900]
         [data.[533]; data.[614];data.[714]; data.[715]]
+        //|> Seq.filter (fun (m, _) -> m.Contains("Bacteria;"))
         |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
     
-    let completeGenData =
-        getData @"../../../data/complete_genome/ATCC_35405.txt" true
-        |> Seq.map (fun x -> TestCaseData(Str x))
-        //|> Seq.map(fun (x, y) -> TestCaseData(Str (x, y.[610000 .. 620000])))
+    let completeGenData = 
+        Directory.GetFiles("../../../data/complete_genome/", "*.txt", SearchOption.AllDirectories)
+        |> Seq.map (fun x -> TestCaseData(File x))       
         
     let writeSummary = [|TestCaseData(0, Sum)|]
+    let genomeSummary = [TestCaseData(Sum)]
 
     [<TestCaseSource("completeGenData")>]
+    [<TestCaseSource("genomeSummary")>]
     [<Ignore("too loooong")>]
     let ``Identify 16s in complete genome`` = function
-        | Str (meta, genome) ->
+        | File(f) ->
+            let meta, genome = (getData f true).[0]
+            
             let stopWatch = System.Diagnostics.Stopwatch.StartNew()
-            printfn "%i" genome.Length
             let result = parallelSearch16s 4 5000 600 250 genome
             stopWatch.Stop()
-
-            let report = new OrganismReport(meta, result)
-            System.IO.File.WriteAllText("report.txt", report.ToString())
-            printfn "correct: %i" report.CorrectResults.Length
-            printfn "incorrect: %i" report.IncorrectResults.Length
-            //result |> Array.iter (fun (x, y) -> printfn "%i : %i" x y)
-            printfn "%f" stopWatch.Elapsed.TotalSeconds 
             
-        | _ -> failwith ""
-                   
+            let report = new OrganismReport(meta, stopWatch.Elapsed, result)
+            reports.Add report
+            printfn "%s %s" report.Id report.Name
+            printfn "length: %i" genome.Length
+            printfn "time: %f" stopWatch.Elapsed.TotalMinutes
+            printfn 
+                "e: %i; cv: %i; tp: %i; fp: %i"
+                report.ExpectedCount
+                report.CoveredCount
+                report.CorrectCount
+                report.IncorrectCount
+            Assert.AreEqual(report.Expected, report.Covered, "Uncovered intervals")
+        | Sum ->            
+            let totalReport = new TotalReport(List.ofSeq reports)
+            totalReport.PrintSummary()
+            totalReport.PrintToFile("../../full_report.txt")
+        | _ -> printfn "incorrect test data"
+            
     //[<TestCaseSource("testData")>]
     [<TestCaseSource("semenData")>]
     [<TestCaseSource("writeSummary")>]
@@ -290,6 +307,7 @@ module ``reference tests`` =
                 for i in 1..(7 - parsed.ToString().Length) do
                     printf " "
                 notParsed.ToString() |> printf "%s\n"
+        | _ -> printfn "incorrect test data"
 
 //[<EntryPointAttribute>]
 //let main arg = 
