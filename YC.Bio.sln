@@ -37,7 +37,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Bio.GraphLoader", "src\Bio.
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Bio.Search", "src\Bio.Search\Bio.Search.fsproj", "{3D4A8BFE-32ED-47A7-8AFB-5CF13266FB4B}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SPPFbuilder", "src\SPPFbuilder\SPPFbuilder.fsproj", "{462A7FFE-DCFD-4CA5-A88F-24EB0F6D59FD}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Bio.TreeExport", "src\Bio.TreeExport\Bio.TreeExport.fsproj", "{462A7FFE-DCFD-4CA5-A88F-24EB0F6D59FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

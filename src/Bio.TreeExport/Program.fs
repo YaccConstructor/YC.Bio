@@ -1,5 +1,4 @@
-﻿// Learn more about F# at http://fsharp.org
-// See the 'F# Tutorial' project for more help.
+﻿module Bio.TreeExport
 open AbstractAnalysis.Common
 
 open Yard.Generators.GLL
@@ -145,8 +144,138 @@ let treeToGraph tree =
         graph.AddEdge(new TaggedEdge<_,_>(source, target, true)) |> ignore)
 
     graph
-    
 
+let treeToMsaglGraph tree = 
+    let graph = new Microsoft.Msagl.Drawing.Graph("graph")
+    let stemConnections = new ResizeArray<_>()
+    let rec getVerts = function
+        | SPPFNonterminal (l, name) ->
+            let verts = 
+                l
+                |> Array.collect (fun x -> getVerts x)
+            if name.Contains "toCount" && l.Length > 1
+            then
+                stemConnections.Add(verts.[0], verts.[verts.Length-1])
+            verts
+        | SPPFTerminal (name,left,right) ->
+            [|name,left|]
+
+    let verts = getVerts tree
+    
+    printfn "Stem connections: %i" stemConnections.Count
+
+    verts
+    |> Array.pairwise
+    |> Array.iter (fun (source,target) ->
+        graph.AddEdge(source.ToString(),target.ToString()) |> ignore)
+    
+    stemConnections
+    |> Seq.iter(fun (source,target) ->
+        graph.AddEdge(source.ToString(),target.ToString()).Attr.Length <- 0.3)
+
+    graph
+
+//let treeToMsaglGraph tree = 
+//    let graph = new Microsoft.Msagl.Drawing.Graph("graph")
+//    let stemConnections = new ResizeArray<_>()
+//    let rec getVerts = function
+//        | SPPFNonterminal (l, name) ->
+//            let verts = 
+//                l
+//                |> Array.collect (fun x -> getVerts x)
+//            if name.Contains "toCount" && l.Length > 1
+//            then
+//                stemConnections.Add(verts.[0], verts.[verts.Length-1])
+//            verts
+//        | SPPFTerminal (name,left,right) ->
+//            [|name,left|]
+//
+//    let verts = getVerts tree
+//    
+//    printfn "Stem connections: %i" stemConnections.Count
+//
+//    let dict = new Dictionary<_,_>()
+//
+//    stemConnections
+//    |> Seq.iter(fun (source,target) ->
+//        dict.Add(source.ToString(),sprintf "%A---%A" source target)
+//        dict.Add(target.ToString(),sprintf "%A---%A" source target))
+//
+//    verts
+//    |> Array.pairwise
+//    |> Array.iter (fun (source,target) ->
+//        if dict.ContainsKey(source.ToString()) && dict.ContainsKey(target.ToString())
+//        then
+//            graph.AddEdge(dict.[source.ToString()],dict.[target.ToString()]) |> ignore
+//        elif dict.ContainsKey(source.ToString())
+//        then
+//            graph.AddEdge(dict.[source.ToString()],target.ToString()) |> ignore
+//        elif dict.ContainsKey(target.ToString())
+//        then
+//            graph.AddEdge(source.ToString(),dict.[target.ToString()]) |> ignore
+//        else
+//            graph.AddEdge(source.ToString(),target.ToString()) |> ignore)
+//    
+//    
+////    stemConnections
+////    |> Seq.iter(fun (source,target) ->
+////        graph.AddEdge(source.ToString(),target.ToString()).Attr.Length <- 0.3)
+//
+//    graph
+
+let showTree tree = 
+    let form = new System.Windows.Forms.Form()
+
+    let form = new System.Windows.Forms.Form()
+    let viewer = new Microsoft.Msagl.GraphViewerGdi.GViewer()
+    let graph = treeToMsaglGraph tree
+
+    viewer.Graph <- graph
+    form.SuspendLayout()
+    viewer.Dock <- System.Windows.Forms.DockStyle.Fill
+    form.Controls.Add(viewer)
+    form.ResumeLayout()
+    form.ShowDialog() |> ignore    
+
+let treeToSecondaryStructureAndSeq tree =
+    let stemConnections = new ResizeArray<_>()
+    let rec getSecondaryStructure = function
+        | SPPFNonterminal (l, name) ->
+            let verts = 
+                l
+                |> Array.collect (fun x -> getSecondaryStructure x)
+            if name.Contains "toCount" && l.Length > 1
+            then
+                verts.[0] <- '('
+                verts.[verts.Length-1] <- ')'
+            verts
+        | SPPFTerminal (name,left,right) ->
+            [|'.'|]
+
+    let rec getSequence : _ -> string []= function
+        | SPPFNonterminal (l, name) ->
+            l
+            |> Array.collect (fun x -> getSequence x)
+        | SPPFTerminal (name,left,right) ->
+            [|name|]
+
+    let secondaryStructure = getSecondaryStructure tree
+    let sequence = getSequence tree
+    let sb = new System.Text.StringBuilder()
+    for i in secondaryStructure do
+        sb.Append(i) |> ignore
+    let s1 = sb.ToString()
+    sb.Clear() |> ignore
+    for i in sequence do
+        sb.Append(i.[0]) |> ignore
+    s1, sb.ToString()
+
+let exportStructureToFile fileName (tree : Tree<_>) =
+    let ss, s = tree.GetBestTree() |> treeToSecondaryStructureAndSeq
+    System.IO.File.WriteAllLines(fileName,
+                                 [">name";
+                                  s;
+                                  ss])
 [<EntryPoint>]
 let main argv = 
     printfn "Reading data"
@@ -162,35 +291,15 @@ let main argv =
     printfn "PostProcessing"
     let ast = tree.GetBestTree()
     printfn "To graph"
-    let graph = treeToGraph ast
-    printfn "To dot"
-    toDot "parsed16s.dot" graph
-
-    let form = new System.Windows.Forms.Form()
-//create a form 
-    let form = new System.Windows.Forms.Form()
-//create a viewer object 
-    let viewer = new Microsoft.Msagl.GraphViewerGdi.GViewer()
-//create a graph object 
-    let graph = new Microsoft.Msagl.Drawing.Graph("graph")
-//create the graph content 
-    graph.AddEdge("A", "B") |> ignore
-    graph.AddEdge("B", "C") |> ignore
-    graph.AddEdge("A", "C").Attr.Color = Microsoft.Msagl.Drawing.Color.Green |> ignore
-    graph.FindNode("A").Attr.FillColor = Microsoft.Msagl.Drawing.Color.Magenta |> ignore
-    graph.FindNode("B").Attr.FillColor = Microsoft.Msagl.Drawing.Color.MistyRose |> ignore
-    let c = graph.FindNode("C")
-    c.Attr.FillColor <- Microsoft.Msagl.Drawing.Color.PaleGreen 
-    c.Attr.Shape <- Microsoft.Msagl.Drawing.Shape.Diamond
-//bind the graph to the viewer 
-    viewer.Graph <- graph
-//associate the viewer with the form 
-    form.SuspendLayout()
-    viewer.Dock <- System.Windows.Forms.DockStyle.Fill
-    form.Controls.Add(viewer)
-    form.ResumeLayout()
-//show the form 
-    form.ShowDialog() |> ignore
+    //let graph = treeToGraph ast
+    //printfn "To dot"
+    //toDot "parsed16s.dot" graph
+    //showTree ast
+    let ss, s = treeToSecondaryStructureAndSeq ast
+    System.IO.File.WriteAllLines("toDraw.txt",
+                                 [">name";
+                                  s;
+                                  ss])
     //tree.AstToDot parserSource.IntToString "sppf.dot"
     
 //    res

@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <Name>SPPFbuilder</Name>
+    <Name>Bio.TreeExport</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,13 +42,13 @@
       <HintPath>..\..\Bin\Debug\v40\CustomHashSet.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Msagl">
-      <HintPath>..\..\..\Code\automatic-graph-layout\GraphLayout\MSAGL\bin\Release\Microsoft.Msagl.dll</HintPath>
+      <HintPath>..\..\lib\GraphViewerGDI\Microsoft.Msagl.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Msagl.Drawing">
-      <HintPath>..\..\..\Code\automatic-graph-layout\GraphLayout\tools\GraphViewerGDI\bin\Release\Microsoft.Msagl.Drawing.dll</HintPath>
+      <HintPath>..\..\lib\GraphViewerGDI\Microsoft.Msagl.Drawing.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Msagl.GraphViewerGdi">
-      <HintPath>..\..\..\Code\automatic-graph-layout\GraphLayout\tools\GraphViewerGDI\bin\Release\Microsoft.Msagl.GraphViewerGdi.dll</HintPath>
+      <HintPath>..\..\lib\GraphViewerGDI\Microsoft.Msagl.GraphViewerGdi.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
