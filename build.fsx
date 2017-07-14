@@ -377,10 +377,10 @@ Target "All" DoNothing
   ==> "RunTests"
   ==> "GenerateReferenceDocs"
   ==> "GenerateDocs"
-#if MONO
+(*#if MONO
 #else
   =?> ("SourceLink", Pdbstr.tryFind().IsSome )
-#endif
+#endif*)
   ==> "NuGet"
   ==> "BuildPackage"
   ==> "All"
