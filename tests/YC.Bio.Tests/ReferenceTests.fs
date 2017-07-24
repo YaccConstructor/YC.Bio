@@ -114,8 +114,12 @@ let getLinearInputWithAllStartingPos line =
 let isParsed = 
     Yard.Generators.GLL.AbstractParser.isParsed
 
-let extractName (meta : string) =
+let extractRoot (meta : string) =
     meta.Split([|' '; ';'|]).[1]
+
+let extractFamily (meta: string) =
+    let parts = meta.Split(';')
+    parts.[parts.Length - 2]
 
 let extractID (meta : string) =
     meta.Split([|' '; '>'|], System.StringSplitOptions.RemoveEmptyEntries).[0]
@@ -163,19 +167,19 @@ let parallelSearch16s blockSize partLength overlap min16sLength (genome: string)
                                |> List.iter (fun (x, y) -> result.Add (pos + int x, pos + int y)))
     Array.ofSeq result
 
-let collectedResult = new Dictionary<_,int * int>()
-let collectResult isParsed (name : string) =
-    
-    //printfn "name: %s" name
-//    if collectedResult = null then printfn "collectedResult is null"
-//    collectedResult.ContainsKey(name) |> printfn "Contains : %A"
-//    let contains, (parsed, notParsed) = collectedResult.(name)
-    if collectedResult.ContainsKey(name)
+let collectedResult = new Dictionary<string, Dictionary<string, int * int>>()
+let collectResult isParsed root family =
+    let addResult (x, y) = (x + (if isParsed then 1 else 0), y + if isParsed then 0 else 1)
+    if collectedResult.ContainsKey(root)
     then
-        let (parsed, notParsed) = collectedResult.[name]
-        collectedResult.[name] <- (parsed + (if isParsed then 1 else 0), notParsed + if isParsed then 0 else 1)
+        let families = collectedResult.[root]
+        if families.ContainsKey(family)
+        then families.[family] <- addResult families.[family]
+        else families.Add(family, addResult (0, 0))
     else
-        collectedResult.Add(name, ((if isParsed then 1 else 0), if isParsed then 0 else 1))
+        let families = new Dictionary<_, _>()
+        families.Add(family, (addResult (0, 0)))
+        collectedResult.Add(root, families)
 
 let reports = new ResizeArray<_>()
 
@@ -190,7 +194,7 @@ module ``reference tests`` =
 //        (getData @"..\..\..\tests\data\16s\HOMD_16S_rRNA_RefSeq_V14.5.fasta" false).[..99]
 //        |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
 
-    let semenData =
+    let semyonData =
         let data = (getData @"../../../data/16s/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true)
         //[[|a.[157]; a.[161]; a.[183]; a.[184]; a.[188]|] ; a.[190..196] ; a.[200..201] ; a.[241..242] ; [|a.[269]; a.[333]; a.[372]; a.[386]|]]
         //|> Array.concat
@@ -236,7 +240,7 @@ module ``reference tests`` =
         | _ -> printfn "incorrect test data"
             
     //[<TestCaseSource("testData")>]
-    [<TestCaseSource("semenData")>]
+    [<TestCaseSource("semyonData")>]
     [<TestCaseSource("writeSummary")>]
     let  ``Check sequence`` =  function 
         | i, Str (meta, line) -> 
@@ -284,29 +288,32 @@ module ``reference tests`` =
 
     //            res
     //            |> Seq.iter (fun (x,y) -> printfn "%i - %i : %i" x y (y - x))
-            let name = extractName meta 
+            let root = extractRoot meta 
             let id = extractID meta
              
-            collectResult isParsed name
+            collectResult isParsed root (extractFamily meta)
 
-            Assert.AreEqual(isParsed || not (name = "bacteria"), true, sprintf "Line %i( %s ) wasn't parsed:\n%s" (i+1) id reason)
-            //if not isParsed then printfn "Line %i( %s ) wasn't parsed:\n    %s" (i+1) id reason
-            //else printfn "Line %i parsed" (i + 1)
-            if (name = "bacteria") && not isParsed
+            Assert.AreEqual(isParsed || not (root = "bacteria"), true, sprintf "Line %i( %s ) wasn't parsed:\n%s" (i+1) id reason)
+            if not isParsed then printfn "Line %i( %s ) wasn't parsed:\n    %s" (i+1) id reason
+            else printfn "Line %i parsed" (i + 1)
+            if (root = "bacteria") && not isParsed
             then
                 printfn "Line %i( %s ) wasn't parsed:\n    %s" (i+1) id reason
         | _, Sum -> 
+            let output = new StreamWriter("../../16s_report.txt")
+            output.WriteLine(sprintf "%-10s %-30s  %5s  %5s" "Root" "Family" "P" "Np")
             printfn "\nTests summary:"
-            printfn "Name      parsed notParsed"
+            printfn "%-10s %-9s %-9s" "Name" "parsed" "notParsed"
             for kvp in collectedResult do
-                let name,(parsed, notParsed) = kvp.Key, kvp.Value
-                printf "%s" name
-                for i in 1..(10 - name.Length) do
-                    printf " "
-                parsed.ToString() |> printf "%s" 
-                for i in 1..(7 - parsed.ToString().Length) do
-                    printf " "
-                notParsed.ToString() |> printf "%s\n"
+                let root, families = kvp.Key, kvp.Value
+                let parsed, notParsed = ref 0, ref 0                
+                for f in families do
+                    let name, (p, np) = f.Key, f.Value
+                    parsed := !parsed + p
+                    notParsed := !notParsed + np
+                    output.WriteLine(sprintf "%-10s; %-30s; %5i; %5i" root name p np)
+                printfn "%-10s %-9i %-9i" root !parsed !notParsed 
+            output.Close()
         | _ -> printfn "incorrect test data"
 
 //[<EntryPointAttribute>]
