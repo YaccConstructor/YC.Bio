@@ -108,7 +108,7 @@ let getLinearInputWithAllStartingPos line =
     //printfn "%A" tokens
     let startPoss = 
         tokens
-        |> Array.mapi(fun i x -> i* 1<positionInInput>)
+        |> Array.mapi(fun i x -> i * 1<positionInInput>)
     new LinearInput(startPoss,tokens)
 
 let isParsed = 
@@ -230,8 +230,8 @@ module ``reference tests`` =
                 "e: %i; cv: %i; tp: %i; fp: %i"
                 report.ExpectedCount
                 report.CoveredCount
-                report.CorrectCount
-                report.IncorrectCount
+                report.TPIntervalsCount
+                report.FPIntervalsCount
             Assert.AreEqual(report.Expected, report.Covered, "Uncovered intervals")
         | Sum ->            
             let totalReport = new TotalReport(List.ofSeq reports)
@@ -257,24 +257,24 @@ module ``reference tests`` =
                 if res |> Seq.isEmpty then false, "Nothing found." else
                 let is =
                     res
-                    |> Seq.exists(fun (x,y) -> y - x >= 260<positionInInput> &&
+                    |> Seq.exists(fun (x, y) -> y - x >= 260<positionInInput> &&
                                         (*y - x >= 260<positionInInput> && y - x <= 290<positionInInput> && *)x > 400<positionInInput> && y < 900<positionInInput>)
                 if not is
                 then
                     let filtered =
                         res
-                        |> Seq.filter(fun (x,y) -> y - x >= 260<positionInInput>)
+                        |> Seq.filter(fun (x, y) -> y - x >= 260<positionInInput>)
 
                     if filtered |> Seq.isEmpty
                     then
-                        false, res |> Seq.maxBy(fun (x,y) -> y - x) |> (fun (x,y) -> y - x) |> sprintf "Max length is %i"
+                        false, res |> Seq.maxBy(fun (x, y) -> y - x) |> (fun (x, y) -> y - x) |> sprintf "Max length is %i"
                     else
                         let leftmost = 
                             filtered
-                            |> Seq.minBy(fun (x,y) -> x)
+                            |> Seq.minBy(fun (x, y) -> x)
                         let rightmost = 
                             filtered
-                            |> Seq.maxBy(fun (x,y) -> y)
+                            |> Seq.maxBy(fun (x, y) -> y)
                         if leftmost = rightmost
                         then 
                             false
@@ -294,7 +294,7 @@ module ``reference tests`` =
             collectResult isParsed root (extractFamily meta)
 
             Assert.AreEqual(isParsed || not (root = "bacteria"), true, sprintf "Line %i( %s ) wasn't parsed:\n%s" (i+1) id reason)
-            if not isParsed then printfn "Line %i( %s ) wasn't parsed:\n    %s" (i+1) id reason
+            if not isParsed then printfn "Line %i( %s ) wasn't parsed:\n    %s" (i + 1) id reason
             else printfn "Line %i parsed" (i + 1)
             if (root = "bacteria") && not isParsed
             then
