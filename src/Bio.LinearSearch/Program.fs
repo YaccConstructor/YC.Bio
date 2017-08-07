@@ -2,6 +2,8 @@
 
 open YC.Bio.BioParser
 open YC.Bio.Statistics
+open YC.Bio.GoogleAPIQueries
+
 type Domain = Head | Middle
 
 let grammar = @"../../../YC.GrammarZOO/Bio/16s/R16S_19_27.yrd"
@@ -31,12 +33,23 @@ let getData dataPath isFasta =
         lst.Add(!meta, d.ToString())
         lst.ToArray()
 
-let identify16sInGenomes domain =
+let identify16sInGenomes domain sendToGoogle =
+    printfn "Initializing parser..."
     let parser = new BioParser(grammar)
+    printfn "Done"
+    printfn ""
+
     let genomeFiles = 
         Directory.GetFiles("../../../../tests/data/complete_genome/", "*.txt", SearchOption.AllDirectories)
-    
     let reports = new ResizeArray<_>()
+    printfn "Found %i genomes" genomeFiles.Length
+    printfn ""
+
+    let sheetsService = 
+        if sendToGoogle 
+        then Some (googleAuth "YC.Bio.Experiments")
+        else None
+    let sheetRow = ref 2
 
     for f in genomeFiles do
         let meta, genome = (getData f true).[0]
@@ -44,7 +57,7 @@ let identify16sInGenomes domain =
         let result = 
             match domain with
             | Head -> parser.ParseParallel(4, 2000, 600, 470, genome)
-            | Middle -> parser.ParseParallel(4, 5000, 600, 250, genome.[0 .. 1000])
+            | Middle -> parser.ParseParallel(4, 5000, 600, 250, genome)
         stopWatch.Stop()
         
         let report = new OrganismReport(meta, stopWatch.Elapsed, result)
@@ -59,6 +72,15 @@ let identify16sInGenomes domain =
             report.TPIntervalsCount
             report.FPIntervalsCount
         printfn ""
+
+        if sendToGoogle 
+        then 
+            update 
+                "17qCaBvSZKWkOenNyrQhpUNLqv-2QDfHO2sQlrTCix1g" 
+                (sprintf "A%i:O" !sheetRow) 
+                sheetsService.Value 
+                [|report.ToString().Split(',')|]
+            incr sheetRow
                     
     let totalReport = new TotalReport(List.ofSeq reports)
     totalReport.PrintSummary()
@@ -66,5 +88,5 @@ let identify16sInGenomes domain =
 
 [<EntryPoint>]
 let main argv =
-    identify16sInGenomes Middle
+    identify16sInGenomes Middle true
     0 

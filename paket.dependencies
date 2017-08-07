@@ -1,7 +1,9 @@
 source https://nuget.org/api/v2
+framework: net45
 nuget Argu
 nuget FSharp.Core redirects: force
 nuget FSharpx.Collections.Experimental
+nuget Google.Apis.Sheets.v4
 nuget YC.QuickGraph
 
 group Build
