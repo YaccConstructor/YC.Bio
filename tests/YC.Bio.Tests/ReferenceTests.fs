@@ -1,23 +1,13 @@
 module YC.Bio.Tests
 
 open System.IO
-
-open AbstractAnalysis.Common
-
-open Yard.Generators.GLL
-//open Yard.Generators.GLL.Parser 
-open NUnit.Framework
-open Yard.Generators
+open System.Collections.Generic
 open Microsoft.FSharp.Collections
 
-open YC.API
-open Yard.Generators.GLL.ParserCommon
-open System.Collections.Generic
-open Yard.Generators.GLL.AbstractParser
-open Yard.Frontends.YardFrontend
-open Yard.Generators.GLL
-open Yard.Core.Conversions.ExpandMeta
-open YC.Bio.Statistics
+open AbstractAnalysis.Common
+open YC.Bio.BioParser
+
+open NUnit.Framework
 
 //let needChangeDirectory = 
 //    (@"C:\Users\Artem Gorokhov\AppData\Local\JetBrains\Installations\ReSharperPlatformVs14" = System.IO.Directory.GetCurrentDirectory())
@@ -71,49 +61,6 @@ let getData dataPath isFasta =
 //    then @"C:/Code/YaccConstructor/tests/GLLParser.Simple.Tests/"
 //    else @"./GLLParser.Simple.Tests/"
 
-let getTokens (line : string) =
-    line.ToCharArray()
-
-//let getLinearInput line (stringToToken : string -> int<token>) = 
-//    new LinearInput(
-//            getTokens line
-//            |> Array.map stringToToken
-//            )
-
-let parserSource = 
-    let fe = new YardFrontend()
-    let gen = new GLL()
-    let conv = seq{yield new ExpandMeta()}
-    generate grammar
-             fe gen 
-             None
-             conv
-             [|""|]
-             //[ "ExpandEbnf"; "ExpandMeta"; "ExpandInnerAlt"; "AddDefaultAC"; "Linearize"]
-             [] :?> ParserSourceGLL
-
-let tokenizer (x : char) =
-    System.Char.ToUpper x
-    |> (fun x ->
-        match x with 
-        | 'A' | 'C' | 'G' ->  x.ToString()
-        | _ -> "U")
-    |> parserSource.StringToToken
-
-let getLinearInputWithAllStartingPos line = 
-    let tokens = 
-        getTokens line
-        |> Array.map tokenizer
-
-    //printfn "%A" tokens
-    let startPoss = 
-        tokens
-        |> Array.mapi(fun i x -> i * 1<positionInInput>)
-    new LinearInput(startPoss,tokens)
-
-let isParsed = 
-    Yard.Generators.GLL.AbstractParser.isParsed
-
 let extractRoot (meta : string) =
     meta.Split([|' '; ';'|]).[1]
 
@@ -123,49 +70,6 @@ let extractFamily (meta: string) =
 
 let extractID (meta : string) =
     meta.Split([|' '; '>'|], System.StringSplitOptions.RemoveEmptyEntries).[0]
-
-let parallelSearch16s blockSize partLength overlap min16sLength (genome: string) =
-    let blockLength = partLength * blockSize
-    let blocksNum = genome.Length / blockLength
-    let realStartPos i j = i * blockLength + j * partLength
-    let result = new ResizeArray<_>()
-
-    let getPart blockNum partNum =
-        let pos = realStartPos blockNum partNum
-        let part = 
-            if genome.Length - pos > partLength + overlap
-            then genome.[pos .. pos + partLength + overlap]
-            elif genome.Length - 1 > pos
-            then genome.[pos ..]
-            else ""  
-        getLinearInputWithAllStartingPos part
-  
-    let selectRepresentatives (pairs: seq<_>) = 
-        if Seq.length pairs = 0
-        then []
-        else
-            let h = Seq.head pairs
-            let _, _, res = 
-                pairs                 
-                |> Seq.filter (fun (x, y) -> y - x > min16sLength * 1<positionInInput>)
-                |> Seq.fold    //select the longest result from each group
-                       (fun (pos, max, acc) (x, y) -> 
-                            if x - pos > 50<positionInInput>
-                            then (x, (x, y), max :: acc)
-                            elif y - x > snd max - fst max
-                            then (pos, (x, y), acc)
-                            else (pos, max, acc)) 
-                       (fst h, h, [])
-            List.rev res
-                                               
-    for i in 0 .. blocksNum do
-        [| for j in 0 .. blockSize - 1 -> getPart i j |]
-        |> Array.Parallel.map (getAllRangesForStartState parserSource)
-        |> Array.iteri (fun j s ->
-                            let pos = realStartPos i j
-                            in selectRepresentatives s   
-                               |> List.iter (fun (x, y) -> result.Add (pos + int x, pos + int y)))
-    Array.ofSeq result
 
 let collectedResult = new Dictionary<string, Dictionary<string, int * int>>()
 let collectResult isParsed root family =
@@ -181,11 +85,8 @@ let collectResult isParsed root family =
         families.Add(family, (addResult (0, 0)))
         collectedResult.Add(root, families)
 
-let reports = new ResizeArray<_>()
-
 type Msg =
     | Str of string * string
-    | File of string
     | Sum
 
 [<TestFixture>]
@@ -193,6 +94,8 @@ module ``reference tests`` =
 //    let testData = 
 //        (getData @"..\..\..\tests\data\16s\HOMD_16S_rRNA_RefSeq_V14.5.fasta" false).[..99]
 //        |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
+    
+    let parser = new BioParser(grammar)
 
     let semyonData =
         let data = (getData @"../../../data/16s/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true)
@@ -201,52 +104,17 @@ module ``reference tests`` =
         //data.[800..900]
         [data.[533]; data.[614];data.[714]; data.[715]]
         //|> Seq.filter (fun (m, _) -> m.Contains("Bacteria;"))
-        |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
-    
-    let completeGenData = 
-        Directory.GetFiles("../../../data/complete_genome/", "*.txt", SearchOption.AllDirectories)
-        |> Seq.map (fun x -> TestCaseData(File x))       
+        |> Seq.mapi(fun i x -> TestCaseData(i, Str x))   
         
     let writeSummary = [|TestCaseData(0, Sum)|]
-    let genomeSummary = [TestCaseData(Sum)]
-
-    [<TestCaseSource("completeGenData")>]
-    [<TestCaseSource("genomeSummary")>]
-    [<Ignore("too loooong")>]
-    let ``Identify 16s in complete genome`` = function
-        | File(f) ->
-            let meta, genome = (getData f true).[0]
-            
-            let stopWatch = System.Diagnostics.Stopwatch.StartNew()
-            let result = parallelSearch16s 4 5000 600 250 genome
-            stopWatch.Stop()
-            
-            let report = new OrganismReport(meta, stopWatch.Elapsed, result)
-            reports.Add report
-            printfn "%s %s" report.Id report.Name
-            printfn "length: %i" genome.Length
-            printfn "time: %f" stopWatch.Elapsed.TotalMinutes
-            printfn 
-                "e: %i; cv: %i; tp: %i; fp: %i"
-                report.ExpectedCount
-                report.CoveredCount
-                report.TPIntervalsCount
-                report.FPIntervalsCount
-            Assert.AreEqual(report.Expected, report.Covered, "Uncovered intervals")
-        | Sum ->            
-            let totalReport = new TotalReport(List.ofSeq reports)
-            totalReport.PrintSummary()
-            totalReport.PrintToFile("../../full_report.txt")
-        | _ -> printfn "incorrect test data"
             
     //[<TestCaseSource("testData")>]
     [<TestCaseSource("semyonData")>]
     [<TestCaseSource("writeSummary")>]
     let  ``Check sequence`` =  function 
         | i, Str (meta, line) -> 
-            let input  = getLinearInputWithAllStartingPos line
+            let res = parser.Parse(line)            
             //let tree = buildAst parserSource input
-            let res = getAllRangesForStartState parserSource input
     //        let gss = getGSS parserSource input
     //        gss.Vertices
     //        |> Seq.filter(fun v -> v.P.SetP.Count <> 0)
@@ -314,7 +182,6 @@ module ``reference tests`` =
                     output.WriteLine(sprintf "%-10s; %-30s; %5i; %5i" root name p np)
                 printfn "%-10s %-9i %-9i" root !parsed !notParsed 
             output.Close()
-        | _ -> printfn "incorrect test data"
 
 //[<EntryPointAttribute>]
 //let main arg = 

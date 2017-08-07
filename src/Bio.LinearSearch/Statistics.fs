@@ -1,6 +1,9 @@
 ﻿module YC.Bio.Statistics
 
 open System.Text
+open System.IO
+open System.Threading
+open System.Collections.Generic
 
 type OrganismReport(meta: string, time: System.TimeSpan, searchResults: (int * int)[]) =   
     let metaParts = meta.Split(',') |> Array.map (fun s -> s.Trim())

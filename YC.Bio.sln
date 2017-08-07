@@ -39,6 +39,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Bio.Search", "src\Bio.Searc
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Bio.TreeExport", "src\Bio.TreeExport\Bio.TreeExport.fsproj", "{462A7FFE-DCFD-4CA5-A88F-24EB0F6D59FD}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Bio.LinearSearch", "src\Bio.LinearSearch\Bio.LinearSearch.fsproj", "{CF7F3FB3-20A8-4EBA-8D43-C15A215C63B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{462A7FFE-DCFD-4CA5-A88F-24EB0F6D59FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{462A7FFE-DCFD-4CA5-A88F-24EB0F6D59FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{462A7FFE-DCFD-4CA5-A88F-24EB0F6D59FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF7F3FB3-20A8-4EBA-8D43-C15A215C63B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF7F3FB3-20A8-4EBA-8D43-C15A215C63B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF7F3FB3-20A8-4EBA-8D43-C15A215C63B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF7F3FB3-20A8-4EBA-8D43-C15A215C63B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

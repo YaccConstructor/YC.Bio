@@ -5,14 +5,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>462a7ffe-dcfd-4ca5-a88f-24eb0f6d59fd</ProjectGuid>
+    <ProjectGuid>cf7f3fb3-20a8-4eba-8d43-c15a215c63b3</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>SPPFbuilder</RootNamespace>
-    <AssemblyName>SPPFbuilder</AssemblyName>
+    <RootNamespace>Bio.LinearSearch</RootNamespace>
+    <AssemblyName>Bio.LinearSearch</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <Name>Bio.TreeExport</Name>
+    <Name>Bio.LinearSearch</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -24,8 +24,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\SPPFbuilder.XML</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>bin\Debug\Bio.LinearSearch.XML</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -35,79 +35,46 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\SPPFbuilder.XML</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>bin\Release\Bio.LinearSearch.XML</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CustomHashSet">
-      <HintPath>..\..\Bin\Debug\v40\CustomHashSet.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Msagl">
-      <HintPath>..\..\lib\GraphViewerGDI\Microsoft.Msagl.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Msagl.Drawing">
-      <HintPath>..\..\lib\GraphViewerGDI\Microsoft.Msagl.Drawing.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Msagl.GraphViewerGdi">
-      <HintPath>..\..\lib\GraphViewerGDI\Microsoft.Msagl.GraphViewerGdi.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="YC.AbstractAnalysis.Common">
-      <HintPath>..\..\bin\Debug\v40\YC.AbstractAnalysis.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.AbstractLexer.Interpreter">
-      <HintPath>..\..\bin\Debug\v40\YC.AbstractLexer.Interpreter.dll</HintPath>
+      <HintPath>..\..\lib\YaccConstructor\YC.AbstractAnalysis.Common.dll</HintPath>
     </Reference>
     <Reference Include="YC.AST.Common">
-      <HintPath>..\..\bin\Debug\v40\YC.AST.Common.dll</HintPath>
+      <HintPath>..\..\lib\YaccConstructor\YC.AST.Common.dll</HintPath>
     </Reference>
     <Reference Include="YC.Common">
-      <HintPath>..\..\bin\Debug\v40\YC.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.Constraints">
-      <HintPath>..\..\bin\Debug\v40\YC.Constraints.dll</HintPath>
+      <HintPath>..\..\lib\YaccConstructor\YC.Common.dll</HintPath>
     </Reference>
     <Reference Include="YC.Conversions">
-      <HintPath>..\..\bin\Debug\v40\YC.Conversions.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.FsYaccFrontend">
-      <HintPath>..\..\bin\Debug\v40\YC.FsYaccFrontend.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.Generators.Common">
-      <HintPath>..\..\bin\Debug\v40\YC.Generators.Common.dll</HintPath>
+      <HintPath>..\..\lib\YaccConstructor\YC.Conversions.dll</HintPath>
     </Reference>
     <Reference Include="YC.GLLAbstractParser">
-      <HintPath>..\..\bin\Debug\v40\YC.GLLAbstractParser.dll</HintPath>
+      <HintPath>..\..\lib\YaccConstructor\YC.GLLAbstractParser.dll</HintPath>
     </Reference>
     <Reference Include="YC.GLLGenerator">
-      <HintPath>..\..\bin\Debug\v40\YC.GLLGenerator.dll</HintPath>
+      <HintPath>..\..\lib\YaccConstructor\YC.GLLGenerator.dll</HintPath>
     </Reference>
     <Reference Include="YC.Parser.Common">
-      <HintPath>..\..\bin\Debug\v40\YC.Parser.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.PrettyPrinter">
-      <HintPath>..\..\bin\Debug\v40\YC.PrettyPrinter.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.Utils.SourceText">
-      <HintPath>..\..\bin\Debug\v40\YC.Utils.SourceText.dll</HintPath>
+      <HintPath>..\..\lib\YaccConstructor\YC.Parser.Common.dll</HintPath>
     </Reference>
     <Reference Include="YC.YaccConstructor">
-      <HintPath>..\..\bin\Debug\v40\YC.YaccConstructor.dll</HintPath>
+      <HintPath>..\..\lib\YaccConstructor\YC.YaccConstructor.dll</HintPath>
     </Reference>
     <Reference Include="YC.YardFrontend">
-      <HintPath>..\..\bin\Debug\v40\YC.YardFrontend.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.YardPrinter">
-      <HintPath>..\..\bin\Debug\v40\YC.YardPrinter.dll</HintPath>
+      <HintPath>..\..\lib\YaccConstructor\YC.YardFrontend.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="BioParser.fs" />
+    <Compile Include="Statistics.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="paket.references" />

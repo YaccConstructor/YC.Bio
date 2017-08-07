@@ -2,7 +2,7 @@
 namespace System
 open System.Reflection
 
-[<assembly: AssemblyTitleAttribute("Bio.TreeExport")>]
+[<assembly: AssemblyTitleAttribute("Bio.LinearSearch")>]
 [<assembly: AssemblyProductAttribute("YC.Bio")>]
 [<assembly: AssemblyDescriptionAttribute("Tools for metagenomic assembly processing.")>]
 [<assembly: AssemblyVersionAttribute("0.0.1")>]
@@ -11,7 +11,7 @@ open System.Reflection
 do ()
 
 module internal AssemblyVersionInformation =
-    let [<Literal>] AssemblyTitle = "Bio.TreeExport"
+    let [<Literal>] AssemblyTitle = "Bio.LinearSearch"
     let [<Literal>] AssemblyProduct = "YC.Bio"
     let [<Literal>] AssemblyDescription = "Tools for metagenomic assembly processing."
     let [<Literal>] AssemblyVersion = "0.0.1"
