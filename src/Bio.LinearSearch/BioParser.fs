@@ -44,6 +44,16 @@ type BioParser(grammar) =
             |> Array.mapi(fun i x -> i * 1<positionInInput>)
         new LinearInput(startPoss,tokens)
     
+    let rec selectLongestFromGroups pos max selected pairs =
+        match pairs with
+        | [] -> max :: selected |> List.rev
+        | (x, y) :: t -> 
+            if x - pos > 50<positionInInput>
+            then selectLongestFromGroups x (x, y) (max :: selected) t
+            elif y - x > snd max - fst max
+            then selectLongestFromGroups pos (x, y) selected t
+            else selectLongestFromGroups pos max selected t
+
     let parallelSearch16s blockSize partLength overlap min16sLength (genome: string) =
         let blockLength = partLength * blockSize
         let blocksNum = genome.Length / blockLength
@@ -52,31 +62,23 @@ type BioParser(grammar) =
 
         let getPart blockNum partNum =
             let pos = realStartPos blockNum partNum
-            let part = 
+            let part =
                 if genome.Length - pos > partLength + overlap
                 then genome.[pos .. pos + partLength + overlap]
                 elif genome.Length - 1 > pos
                 then genome.[pos ..]
                 else ""  
             getLinearInputWithAllStartingPos part
-  
+
         let selectRepresentatives (pairs: seq<_>) = 
             if Seq.length pairs = 0
             then []
             else
                 let h = Seq.head pairs
-                let _, _, res = 
-                    pairs                 
-                    |> Seq.filter (fun (x, y) -> y - x > min16sLength * 1<positionInInput>)
-                    |> Seq.fold    //select the longest result from each group
-                           (fun (pos, max, acc) (x, y) -> 
-                                if x - pos > 50<positionInInput>
-                                then (x, (x, y), max :: acc)
-                                elif y - x > snd max - fst max
-                                then (pos, (x, y), acc)
-                                else (pos, max, acc)) 
-                           (fst h, h, [])
-                List.rev res
+                pairs
+                |> Seq.filter (fun (x, y) -> y - x > min16sLength * 1<positionInInput>)
+                |> Seq.toList
+                |> selectLongestFromGroups (fst h) h []
 
         for i in 0 .. blocksNum do
             [| for j in 0 .. blockSize - 1 -> getPart i j |]
