@@ -29,6 +29,7 @@ type OrganismReport(meta: string, time: System.TimeSpan, searchResults: (int * i
                     result.Add((!curStart, !curEnd))
                     curStart := s
                     curEnd := e
+            result.Add((!curStart, !curEnd))
             result.ToArray()
     
     let lengthAndDeviation (intervals: (int * int)[]) =
