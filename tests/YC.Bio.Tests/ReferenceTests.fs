@@ -6,6 +6,7 @@ open Microsoft.FSharp.Collections
 
 open AbstractAnalysis.Common
 open YC.Bio.BioParser
+open YC.Bio.Statistics
 
 open NUnit.Framework
 
@@ -96,9 +97,11 @@ module ``reference tests`` =
 //        |> Seq.mapi(fun i x -> TestCaseData(i, Str x))
     
     let parser = new BioParser(grammar)
+    let headFilter (x, y) = y - x >= 470<positionInInput> && x > 0<positionInInput> && y < 800<positionInInput>
+    let middleFilter (x, y) = y - x >= 260<positionInInput> && x > 400<positionInInput> && y < 900<positionInInput>
 
     let semyonData =
-        let data = (getData @"../../../data/16s/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true)
+        let data = getData @"../../../data/16s/SILVA_128_SSURef_Nr99_tax_silva_first_500k_lines.fasta" true
         //[[|a.[157]; a.[161]; a.[183]; a.[184]; a.[188]|] ; a.[190..196] ; a.[200..201] ; a.[241..242] ; [|a.[269]; a.[333]; a.[372]; a.[386]|]]
         //|> Array.concat
         //data.[800..900]
@@ -107,7 +110,7 @@ module ``reference tests`` =
         |> Seq.mapi(fun i x -> TestCaseData(i, Str x))   
         
     let writeSummary = [|TestCaseData(0, Sum)|]
-            
+
     //[<TestCaseSource("testData")>]
     [<TestCaseSource("semyonData")>]
     [<TestCaseSource("writeSummary")>]
@@ -123,16 +126,12 @@ module ``reference tests`` =
     //        |> Seq.iter(fun (x, y, z, len) -> printfn "Nonterm:%s, %i - %i, len: %i" (parserSource.IntToString.[int x]) y z len)
             let isParsed, reason = 
                 if res |> Seq.isEmpty then false, "Nothing found." else
-                let is =
-                    res
-                    |> Seq.exists(fun (x, y) -> y - x >= 260<positionInInput> &&
-                                        (*y - x >= 260<positionInInput> && y - x <= 290<positionInInput> && *)x > 400<positionInInput> && y < 900<positionInInput>)
+                let is = res |> Seq.exists middleFilter
                 if not is
                 then
                     let filtered =
                         res
                         |> Seq.filter(fun (x, y) -> y - x >= 260<positionInInput>)
-
                     if filtered |> Seq.isEmpty
                     then
                         false, res |> Seq.maxBy(fun (x, y) -> y - x) |> (fun (x, y) -> y - x) |> sprintf "Max length is %i"
@@ -153,7 +152,6 @@ module ``reference tests`` =
                             + sprintf "    Rightmost: %i - %i, %i" (fst rightmost) (snd rightmost) (snd rightmost - fst rightmost)
                 else
                     true, ""
-
     //            res
     //            |> Seq.iter (fun (x,y) -> printfn "%i - %i : %i" x y (y - x))
             let root = extractRoot meta 
@@ -183,13 +181,19 @@ module ``reference tests`` =
                 printfn "%-10s %-9i %-9i" root !parsed !notParsed 
             output.Close()
 
-//[<EntryPointAttribute>]
-//let main arg = 
-//    let line = (getData @"..\..\..\tests\data\16s\VKM_Ac-1815D.fa" true).[0]
-//    let before = System.DateTime.Now
-//
-//    let input  = getLinearInputWithAllStartingPos line
-//    let res = getAllRangesForStartState parserSource input
-//    System.IO.File.WriteAllLines("resultOfGenomeParsing.txt", res |> Seq.map(fun x -> x.ToString()))
-//    printfn "Time: %A" (System.DateTime.Now - before)
-//    0
+    [<Test>]
+    let ``Statistics correctness``() =
+        let data = (getData "../../../data/statistics/16s_gen.txt" true).[0]
+        let result =
+            parser.Parse (snd data)
+            |> Seq.filter middleFilter
+            |> Seq.map (fun (x, y) -> (int x, int y)) 
+            |> Seq.toArray
+        let report = new OrganismReport((fst data), new System.TimeSpan(), result)
+        Assert.IsTrue
+            (report.ExpectedCount = 1 
+             && report.CoveredCount = 1
+             && report.TPIntervalsCount >= 1
+             && report.FPIntervalsCount = 0
+             && report.TPOffsets.Length >= 1
+             && report.TPOffsets |> Array.forall (fun x -> x < 0))
