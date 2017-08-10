@@ -31,7 +31,7 @@ type BioParser(grammar) =
         System.Char.ToUpper x
         |> (fun x ->
                 match x with 
-                | 'A' | 'C' | 'G' ->  x.ToString()
+                | 'A' | 'C' | 'G' -> x.ToString()
                 | _ -> "U")
         |> parserSource.StringToToken
     
@@ -42,24 +42,14 @@ type BioParser(grammar) =
         let startPoss = 
             tokens
             |> Array.mapi(fun i x -> i * 1<positionInInput>)
-        new LinearInput(startPoss,tokens)
-    
-    let rec selectLongestFromGroups pos max selected pairs =
-        match pairs with
-        | [] -> max :: selected |> List.rev
-        | (x, y) :: t -> 
-            if x - pos > 50<positionInInput>
-            then selectLongestFromGroups x (x, y) (max :: selected) t
-            elif y - x > snd max - fst max
-            then selectLongestFromGroups pos (x, y) selected t
-            else selectLongestFromGroups pos max selected t
+        new LinearInput(startPoss, tokens)
 
     let parallelSearch16s blockSize partLength overlap min16sLength (genome: string) =
         let blockLength = partLength * blockSize
         let blocksNum = genome.Length / blockLength
         let realStartPos i j = i * blockLength + j * partLength
         let result = new ResizeArray<_>()
-
+         
         let getPart blockNum partNum =
             let pos = realStartPos blockNum partNum
             let part =
@@ -70,23 +60,14 @@ type BioParser(grammar) =
                 else ""  
             getLinearInputWithAllStartingPos part
 
-        let selectRepresentatives (pairs: seq<_>) = 
-            if Seq.length pairs = 0
-            then []
-            else
-                let h = Seq.head pairs
-                pairs
-                |> Seq.filter (fun (x, y) -> y - x > min16sLength * 1<positionInInput>)
-                |> Seq.toList
-                |> selectLongestFromGroups (fst h) h []
-
         for i in 0 .. blocksNum do
             [| for j in 0 .. blockSize - 1 -> getPart i j |]
             |> Array.Parallel.map (getAllRangesForStartState parserSource)
             |> Array.iteri (fun j s ->
                                 let pos = realStartPos i j
-                                in selectRepresentatives s   
-                                   |> List.iter (fun (x, y) -> result.Add (pos + int x, pos + int y)))
+                                in s
+                                   |> Seq.filter (fun (x, y) -> y - x >= min16sLength * 1<positionInInput>)                                   
+                                   |> Seq.iter (fun (x, y) -> result.Add (pos + int x, pos + int y)))                                   
         Array.ofSeq result
             
     member this.Parse(input) = 
