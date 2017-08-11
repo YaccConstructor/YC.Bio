@@ -61,7 +61,7 @@ type OrganismReport(meta: string, time: System.TimeSpan, searchResults: (int * i
 
     let printIntervals =
         let builder = new StringBuilder()
-        [intervals16s; searchResults; intervalUnions]
+        [intervals16s; intervalUnions]
         |> List.iter (fun a -> 
                           a |> Array.iter (fun (x, y) -> builder.Append(sprintf "%i:%i " x y) |> ignore)
                           builder.Append(", ") |> ignore)
@@ -125,8 +125,8 @@ type TotalReport(reports: OrganismReport list) =
         use reportFile = new System.IO.StreamWriter(file)
         let title = 
             sprintf 
-                "%-15s, %-55s, %-17s, %6s, %6s, %6s, %6s, %6s, %6s, %6s, %6s, %6s, %s, %s, %s" 
-                "id" "name" "level" "e_num" "cv_num" "tp_i" "tp_l" "tp_sd" "fp_i" "fp_l" "fp_sd" "tp_of" "exp" "fnd" "union"
+                "%-15s, %-55s, %-17s, %6s, %6s, %6s, %6s, %6s, %6s, %6s, %6s, %6s, %s, %s" 
+                "id" "name" "level" "e_num" "cv_num" "tp_i" "tp_l" "tp_sd" "fp_i" "fp_l" "fp_sd" "tp_of" "exp" "union"
         reportFile.WriteLine(title)
         for r in reports do
             reportFile.WriteLine(r.ToString())

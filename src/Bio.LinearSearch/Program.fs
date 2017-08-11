@@ -72,14 +72,21 @@ let identify16sInGenomes domain sendToGoogle =
             report.TPIntervalsCount
             report.FPIntervalsCount
         printfn ""
-
-        if sendToGoogle 
-        then 
-            update 
+        
+        if sendToGoogle
+        then
+            let values = report.ToString().Split(',')
+            // max number of symbols in a cell must be <= 50K
+            let intervalsParts = 
+                Seq.chunkBySize 40000 values.[13]
+                |> Seq.map System.String
+                |> Seq.toArray
+            let range = sprintf "A%i:%c" !sheetRow (char (int 'N' + intervalsParts.Length))            
+            update
                 "17qCaBvSZKWkOenNyrQhpUNLqv-2QDfHO2sQlrTCix1g" 
-                (sprintf "A%i:O" !sheetRow) 
-                sheetsService.Value 
-                [|report.ToString().Split(',')|]
+                range
+                sheetsService.Value
+                [| Array.concat [values.[0 .. 12]; intervalsParts] |]
             incr sheetRow
                     
     let totalReport = new TotalReport(List.ofSeq reports)
