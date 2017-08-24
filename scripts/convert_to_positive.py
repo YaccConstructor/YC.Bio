@@ -11,9 +11,14 @@ def extract_intervals(source, intervals):
 
 
 def new_description(desc, intervals):
-    new_desc = desc.strip()
-    if not (',' in new_desc):
-        new_desc += ', complete genome'
+    new_desc = ''
+    desc_parts = desc.split(',')
+    if len(desc_parts) == 1:
+    	new_desc = (desc.strip() + ', complete genome') 
+    elif len(desc_parts) == 2:
+    	new_desc = desc.strip()
+    else:
+    	new_desc = (desc_parts[0] + ', ' + desc_parts[1]) 
     new_desc += ', '
     new_desc += ' '.join(["{}:{}".format(x.start, x.end) for x in intervals])
     return new_desc
