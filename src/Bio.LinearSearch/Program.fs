@@ -40,7 +40,7 @@ let identify16sInGenomes domain sendToGoogle =
     printfn ""
 
     let genomeFiles = 
-        Directory.GetFiles("../../../../tests/data/complete_genome/", "*.txt", SearchOption.AllDirectories)
+        Directory.GetFiles("../../../../tests/data/complete_genome/", "*.fasta", SearchOption.AllDirectories)
     let reports = new ResizeArray<_>()
     printfn "Found %i genomes" genomeFiles.Length
     printfn ""
