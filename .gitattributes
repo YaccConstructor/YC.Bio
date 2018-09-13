@@ -24,3 +24,4 @@
 *.RTF diff=astextplain
 ./tests/data/16s/* filter=lfs diff=lfs merge=lfs -text
 *.h5 filter=lfs diff=lfs merge=lfs -text
+*.csv filter=lfs diff=lfs merge=lfs -text
