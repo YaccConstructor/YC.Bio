@@ -1,0 +1,9 @@
+images 80x80
+4 classes: archaeal, bacterial, fungi, plant
+
+train:valid:test = 2000:250:750 per class
+
+Test results:
+model_0.19_94 -- 2812/3000 (93.7%)
+model_0.24_95 -- 2855/3000 (95.16%)
+model_0.28_95 -- 2853/3000 (95.1%)
