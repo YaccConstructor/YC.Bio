@@ -33,28 +33,29 @@ sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
 K.set_session(sess)
 
 arr_length = 3028
-img_size = 80
 batch_size = 64
-epochs = 200
-train_size = 8000
-valid_size = 1000
+epochs = 1500
+train_size = 35000
+valid_size = 15000
 
-data_train ='C:/Users/User/Desktop/folder/tRna_img/data/80/prepared/train'
-data_valid ='C:/Users/User/Desktop/folder/tRna_img/data/80/prepared/valid'
+data_train ='YC.Bio/src/NN1/vectors/tRNA_4classes_220/data/train.csv'
+data_valid ='YC.Bio/src/NN1/vectors/tRNA_4classes_220/data/train.csv'
 
 model = Sequential()
 
-if K.image_data_format() == 'channels_first':
- input_shape = (3, img_size, img_size)
-else:
- input_shape = (img_size, img_size, 3)
+model.add(Dropout(0.3, input_shape=(arr_length,)))
 
-model.add(Conv2D(2, (3, 3), input_shape=input_shape))
+model.add(Dense(8194))
+model.add(BatchNormalization())
 model.add(Activation('relu'))
 
-model.add(Flatten())
+model.add(Dropout(0.9))
 
-model.add(Dropout(0.5))
+model.add(Dense(2048))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+
+model.add(Dropout(0.9))
 
 model.add(Dense(1024))
 model.add(BatchNormalization())
@@ -66,48 +67,49 @@ model.add(Dense(512))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
 
-model.add(Dropout(0.9))
-
-model.add(Dense(128))
-model.add(BatchNormalization())
-model.add(Activation('relu'))
-
 model.add(Dropout(0.75))
 
 model.add(Dense(64))
 model.add(Activation('sigmoid'))
 
-model.add(Dense(4))
+
+model.add(Dense(1))
 model.add(Activation('sigmoid'))
 
-model.compile(loss='categorical_crossentropy',
+model.compile(loss='binary_crossentropy',
               optimizer=
               optimizers.Adagrad(lr=0.05),
               metrics=['accuracy'])
 
-train_datagen = ImageDataGenerator()
-valid_datagen = ImageDataGenerator()
 
-train_generator = train_datagen.flow_from_directory(
-        data_train,  
-        target_size=(img_size, img_size),  
-        batch_size=batch_size,
-        class_mode='categorical')  
-valid_generator = valid_datagen.flow_from_directory(
-        data_valid,
-        target_size=(img_size, img_size),
-        batch_size=batch_size,
-        class_mode='categorical')
+def generate_arrays_from_dir(path, batchsz):   
+    while 1:
+       with open(path) as f:
+            r = csv.reader(f)
+            batchCount = 0
+            batchX = []
+            batchy = []
+            for ln in r:
+                X = np.array(list(np.array(ln[1:(len(ln)-1)],dtype=np.uint32).tobytes()))
+                y = np.array([int(ln[len(ln)-1] == "p")])
+                batchX.append(np.array(X))
+                batchy.append(y)
+                batchCount = batchCount + 1
+                if batchCount == batchsz:
+                    yield (np.array(batchX), np.array(batchy))
+                    batchCount = 0
+                    batchX = []
+                    batchy = []
 
-csv_logger = CSVLogger('training.log')
+csv_logger = CSVLogger('model_084_9728.log')
 
 model.fit_generator(
-    train_generator,
+    generate_arrays_from_dir(data_train,batch_size),
     steps_per_epoch=int(train_size/batch_size) - 1,
-    validation_data=valid_generator,
+    validation_data=generate_arrays_from_dir(data_valid,batch_size),
     validation_steps=int(valid_size/batch_size) - 1,
     epochs=epochs,
     verbose=2,
     callbacks=[csv_logger])
 
-model.save_weights('model.h5')
+model.save_weights('model_084_9728.h5')

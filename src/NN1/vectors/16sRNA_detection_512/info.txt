@@ -1,0 +1,4 @@
+vectors 512
+2 classes: positive, negative
+
+train:valid:test = 21320:10234:7039

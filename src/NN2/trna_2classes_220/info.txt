@@ -1,0 +1,5 @@
+nucleotide sequences 220
+2 classes: prokaryotic, eukaryotic
+base nn1: 'YC.Bio/src/NN1/vectors/tRNA_4classes_220/model_084_9728/model_084_9728.h5'
+
+train:valid = 35000:15000

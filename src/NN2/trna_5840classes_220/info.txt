@@ -1,0 +1,6 @@
+nucleotide sequences 220
+5840 classes: bacterial species from 'YC.Bio/src/NN2/tRNA_5840classes_220/data/species'
+base nn1: 'YC.Bio/src/NN1/vectors/tRNA_4classes_220/model_084_9728/model_084_9728.h5'
+base nn2: 'YC.Bio/src/NN2/tRNA_2classes_220/model_04_98/model_04_98.h5'
+
+train:valid = 23360:11680
