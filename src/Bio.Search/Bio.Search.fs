@@ -471,6 +471,7 @@ let searchMain (config:Config) =
 
 [<EntryPoint>]
 let main argv = 
-    let config = new Config(argv)    
-    searchMain config
+    //let config = new Config(argv)    
+    //searchMain config
+    let sourceGraph, (graphs, edges), longEdges = loadInitialGraph @"/home/gsv/Projects/YaccConstructor/YaccConstructor/Tests/bio/synth_for_semen/simplification" 1024 (fun _ -> 1<token>)
     0

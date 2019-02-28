@@ -7,6 +7,7 @@ open System.IO
 open Microsoft.FSharp.Collections
 open System.Collections.Generic
 open System.Runtime.CompilerServices
+open System.Text
 open QuickGraph.Graphviz
 
 module Array =
@@ -149,7 +150,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
     let longEdges = ResizeArray<_>()
 
     let forFilter =
-        System.IO.File.ReadAllLines(@"..\..\..\src\Bio.Search\data\a1")
+        System.IO.File.ReadAllLines(@"/home/gsv/Projects/YaccConstructor/YC.Bio/src/Bio.Search/data/a1")
         |> Seq.map (fun s -> s.Trim() |> int)
         |> Set.ofSeq
         |> Array.ofSeq
@@ -174,7 +175,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
         
         |> Array.collect 
             (fun e -> 
-                let templateLengthHighLimit = 1000
+                let templateLengthHighLimit = 1024
                 if e.Tag.length <= templateLengthHighLimit
                 then [|e|]
                 else 
@@ -232,6 +233,8 @@ let splitToConnectedSubgraphs edgs tokenizer =
         |> Array.partition (fun eds -> eds.Length > 1)
         |> fun (c,e) -> 
             edges.AddRange e
+            //TODO RM it is only for generation 
+            edges.AddRange c
             c
         |> Array.Parallel.map (fun edges -> 
             let tokenizedEdges = 
@@ -240,7 +243,10 @@ let splitToConnectedSubgraphs edgs tokenizer =
                     new TaggedEdge<_,_>(e.Source, e.Target, new BioGraphEdgeLbl<_>(e.Tag.str |> Array.map tokenizer, e.Tag.length, e.Tag.id, e.Tag.sourceStartPos))
                 )
             new EdgeCompressedGraphInput(tokenizedEdges))
+   // graphs.[1].ToDot("sdsd.dot")
+
     graphs, (edges |> Array.concat)
+    
     
 let loadInitialGraph fileWithoutExt templateLengthHighLimit tokenizer =
     
@@ -258,6 +264,55 @@ let loadInitialGraph fileWithoutExt templateLengthHighLimit tokenizer =
         |> Seq.mapi (fun i line -> (getInfo prefix i) + line)
         |> (fun x -> File.AppendAllLines(path, x))
 
+    let components = splitToConnectedSubgraphs sourceEdges tokenizer
+    
+    let edges = snd components
+    use outFile = new StreamWriter("out_edgs.txt")
+    let lengthLimit = 3000
+    let totalForScan = ref 0
+    
+    let startVertices =
+        let start = new HashSet<_>()
+        //let final = new HashSet<_>()
+        edges |> Seq.iter (fun e -> start.Add e.Source |> ignore; start.Remove e.Target |> ignore)
+        start
+        
+    let collectAllStrings v =
+        //let res = new ResizeArray<_>()
+        let rec go edgs =
+            let newEdgs = new ResizeArray<_>()
+            edgs 
+            |> Array.iter
+                ( fun (s,v) ->
+                    edges
+                    |> Array.filter (fun e -> e.Source = v)
+                    |> (fun a -> if a.Length = 0 && String.length s >= 1024 then (totalForScan := !totalForScan + (String.length s) - 1024; outFile.WriteLine s)
+                                 //printfn "L=%A" a.Length
+                                 a)
+                    |> Array.map (fun e -> (s + new string(e.Tag.str)), e.Target)
+                    |> fun a -> newEdgs.AddRange a
+                    )
+            newEdgs
+            |> ResizeArray.filter (fun (s,v) -> if s.Length >= lengthLimit then (totalForScan := !totalForScan + (String.length s) - 1024; outFile.WriteLine s; false) else true)
+            |> (fun a -> if a.Count > 0
+                         then go (a.ToArray()))
+            
+        edges
+        |> Array.filter (fun e -> e.Source = v)
+        |> Array.map (fun e -> new string(e.Tag.str), e.Target)
+        |> go
+        
+    
+    let lockobj = new ResizeArray<int>()
+        
+    startVertices |> Array.ofSeq |> Array.iter (fun v -> printfn "V = %A" v
+                                                         collectAllStrings v
+                                                         outFile.Flush()
+                                                                  //lock lockobj (fun () -> ())
+                                                                  )
+    
+    printfn "Total for scan: %A" (!totalForScan)
+    
     sourceEdges
-    , splitToConnectedSubgraphs sourceEdges tokenizer
+    , components
     , longEdges    
