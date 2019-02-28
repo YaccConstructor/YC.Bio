@@ -6,6 +6,7 @@ open QuickGraph
 open System.IO
 open Microsoft.FSharp.Collections
 open System.Collections.Generic
+open System.Collections.Generic
 open System.Runtime.CompilerServices
 open System.Text
 open QuickGraph.Graphviz
@@ -175,7 +176,7 @@ let loadGraphFormFileToQG fileWithoutExt templateLengthHighLimit =
         
         |> Array.collect 
             (fun e -> 
-                let templateLengthHighLimit = 1024
+                let templateLengthHighLimit = 300
                 if e.Tag.length <= templateLengthHighLimit
                 then [|e|]
                 else 
@@ -243,7 +244,9 @@ let splitToConnectedSubgraphs edgs tokenizer =
                     new TaggedEdge<_,_>(e.Source, e.Target, new BioGraphEdgeLbl<_>(e.Tag.str |> Array.map tokenizer, e.Tag.length, e.Tag.id, e.Tag.sourceStartPos))
                 )
             new EdgeCompressedGraphInput(tokenizedEdges))
-   // graphs.[1].ToDot("sdsd.dot")
+//    graphs
+//    |> Seq.find (fun g -> g.Vertices |> Seq.exists ((=)8737438<vNumInOriginalGraph>))
+//    |> fun x -> x.ToDot("out.dot")
 
     graphs, (edges |> Array.concat)
     
@@ -268,34 +271,69 @@ let loadInitialGraph fileWithoutExt templateLengthHighLimit tokenizer =
     
     let edges = snd components
     use outFile = new StreamWriter("out_edgs.txt")
-    let lengthLimit = 3000
+    let lengthLimit = 1024
+    let templateLength = 1024
     let totalForScan = ref 0
     
     let startVertices =
         let start = new HashSet<_>()
-        //let final = new HashSet<_>()
-        edges |> Seq.iter (fun e -> start.Add e.Source |> ignore; start.Remove e.Target |> ignore)
+        let final = new HashSet<_>()
+        edges |> Seq.iter (fun e -> start.Add e.Source |> ignore; final.Add e.Target |> ignore)
+        final |> Seq.iter (fun v -> start.Remove v |> ignore)
+        //!start.Remove(14673673<vNumInOriginalGraph>)
+        //start.Remove(11061032<vNumInOriginalGraph>)
+        //start.Remove(11933316<vNumInOriginalGraph>)
+        //start.Remove(6875664<vNumInOriginalGraph>)
+        //start.Remove(14403699<vNumInOriginalGraph>)
+        //start.Remove(13161003<vNumInOriginalGraph>)
+        start.Remove(9316505<vNumInOriginalGraph>) //!!
+        start.Remove(8400129<vNumInOriginalGraph>) //!!
+        start.Remove(8737438<vNumInOriginalGraph>) //!!
+        start.Remove(19379518<vNumInOriginalGraph>) //!!
+        start.Remove(15574226<vNumInOriginalGraph>) //!!
+        start.Remove(8713985<vNumInOriginalGraph>) //!!
+        
+        
         start
         
+    let edgesMap =
+        let res = new Dictionary<_,_>()
+        edges
+        |> Seq.groupBy(fun e -> e.Source)
+        |> Seq.iter (fun (k,v) -> res.Add(k, Array.ofSeq v))
+        res
+        
     let collectAllStrings v =
-        //let res = new ResizeArray<_>()
-        let rec go edgs =
+        let visited = new HashSet<_>()
+        let go (edgs:array<_>) =
+            let toProcess = new Stack<_>(edgs)
             let newEdgs = new ResizeArray<_>()
-            edgs 
-            |> Array.iter
-                ( fun (s,v) ->
-                    edges
-                    |> Array.filter (fun e -> e.Source = v)
-                    |> (fun a -> if a.Length = 0 && String.length s >= 1024 then (totalForScan := !totalForScan + (String.length s) - 1024; outFile.WriteLine s)
-                                 //printfn "L=%A" a.Length
-                                 a)
-                    |> Array.map (fun e -> (s + new string(e.Tag.str)), e.Target)
-                    |> fun a -> newEdgs.AddRange a
-                    )
-            newEdgs
-            |> ResizeArray.filter (fun (s,v) -> if s.Length >= lengthLimit then (totalForScan := !totalForScan + (String.length s) - 1024; outFile.WriteLine s; false) else true)
-            |> (fun a -> if a.Count > 0
-                         then go (a.ToArray()))
+            while toProcess.Count > 0 do
+                let (s,v) = toProcess.Pop()
+                visited.Add v |> ignore
+                
+                let f,a = edgesMap.TryGetValue(v)
+                
+                if not f  
+                then
+                    visited.Clear()
+                    if String.length s >= templateLength
+                    then totalForScan := !totalForScan + (String.length s) - templateLength                         
+                         outFile.WriteLine s
+                else
+                    a
+                    |> Array.iter (fun e ->
+                        let s = s + new string(e.Tag.str)
+                        let v = e.Target
+                    
+                        if s.Length >= lengthLimit
+                        then totalForScan := !totalForScan + (String.length s) - templateLength
+                             visited.Clear()
+                             outFile.WriteLine s
+                        else
+                            if visited.Contains v |> not
+                            then toProcess.Push(s,v)
+                            )
             
         edges
         |> Array.filter (fun e -> e.Source = v)
